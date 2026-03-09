@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IFRS × US GAAP — 2026 Master Study Kit | SegWay Accountants</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root{--ink:#080c1e;--navy:#0f1e45;--gold:#c9973a;--glt:#f4d07a;--cream:#faf6ef;--mist:#eef2f7;--smoke:#5c6880;--red:#c0392b;--green:#1a6b4a;--blue:#2563eb;--bg:#f2ede3}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);overflow-x:hidden;cursor:none}
+.cur-dot{width:9px;height:9px;background:var(--gold);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9999;transform:translate(-50%,-50%)}
+.cur-ring{width:38px;height:38px;border:2px solid var(--gold);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:all .16s ease;opacity:.65}
+.cur-ring.big{width:54px;height:54px;opacity:.9}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.03'/%3E%3C/svg%3E");pointer-events:none;z-index:800;mix-blend-mode:overlay}
+#rp{position:fixed;top:0;left:80px;right:0;height:4px;background:rgba(0,0,0,.08);z-index:700}
+#rb{height:100%;background:linear-gradient(to right,var(--navy),var(--gold));width:0%;transition:width .1s}
+/* SIDEBAR */
+#sb{position:fixed;left:0;top:0;bottom:0;width:80px;background:var(--navy);display:flex;flex-direction:column;align-items:center;padding:28px 0;z-index:600;border-right:2px solid rgba(201,151,58,.25)}
+.slogo{writing-mode:vertical-rl;transform:rotate(180deg);font-family:'Playfair Display',serif;font-size:11px;letter-spacing:.25em;color:var(--gold);font-weight:700;text-transform:uppercase;margin-bottom:auto;padding:8px 0}
+.spills{display:flex;flex-direction:column;gap:8px;margin-bottom:28px}
+.spill{width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;color:rgba(255,255,255,.6);font-size:12px;font-weight:700;text-decoration:none;font-family:'DM Mono',monospace}
+.spill:hover,.spill.on{background:var(--gold);color:var(--navy);border-color:var(--gold);transform:scale(1.08);box-shadow:0 0 20px rgba(201,151,58,.5)}
+main{margin-left:80px}
+/* COVER */
+#p1{min-height:100vh;background:var(--navy);display:grid;grid-template-columns:1fr 1fr}
+.cvl{padding:72px;display:flex;flex-direction:column;justify-content:space-between;border-right:1px solid rgba(201,151,58,.2)}
+.cvey{display:flex;align-items:center;gap:14px;font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);font-weight:700}
+.cvey::before{content:'';display:block;width:36px;height:2px;background:var(--gold)}
+.cvtit{font-family:'Playfair Display',serif;font-size:clamp(60px,7vw,100px);font-weight:900;line-height:.88;margin:36px 0;color:white}
+.cvtit em{font-style:italic;color:var(--gold);display:block}
+.cvsub{font-size:16px;color:rgba(255,255,255,.7);line-height:1.75;max-width:380px;font-weight:300}
+.cvmeta{display:flex;align-items:center;gap:28px;padding-top:44px;border-top:1px solid rgba(255,255,255,.14);margin-top:44px}
+.cvbadge .num{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:var(--gold);display:block}
+.cvbadge .lbl{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.55);display:block;margin-top:4px}
+.cvsep{width:1px;height:44px;background:rgba(255,255,255,.14)}
+.cvr{display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:60px 40px;background:linear-gradient(135deg,#0d1a3e,#081230)}
+.ftag{position:absolute;background:rgba(255,255,255,.07);backdrop-filter:blur(10px);border:1.5px solid rgba(201,151,58,.38);border-radius:10px;padding:11px 18px;font-size:13px;font-weight:700;color:var(--glt);text-transform:uppercase;letter-spacing:.1em;animation:ff 4s ease-in-out infinite;white-space:nowrap}
+.ftag:nth-child(2){animation-delay:-1.4s}.ftag:nth-child(3){animation-delay:-2.8s}
+@keyframes ff{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.ft1{top:12%;left:8%}.ft2{bottom:18%;right:4%}.ft3{top:52%;left:3%}
+/* STATS */
+.statband{background:var(--ink);display:grid;grid-template-columns:repeat(4,1fr);border-top:4px solid var(--gold)}
+.statcell{padding:48px 28px;text-align:center;border-right:1px solid rgba(255,255,255,.09)}
+.statcell:last-child{border:none}
+.statn{font-family:'Playfair Display',serif;font-size:50px;font-weight:700;color:var(--gold);display:block;line-height:1}
+.statl{font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.65);margin-top:12px;display:block;font-weight:500}
+/* DOWNLOAD */
+.dlstrip{background:var(--gold);padding:24px 72px;display:flex;align-items:center;justify-content:space-between}
+.dlstrip p{font-size:16px;font-weight:700;color:var(--navy)}
+.dlbtn{background:var(--navy);color:white;padding:13px 32px;border-radius:12px;border:none;cursor:pointer;font-size:14px;font-weight:700;font-family:'DM Sans',sans-serif;transition:.2s}
+.dlbtn:hover{background:var(--ink);transform:translateY(-1px)}
+/* SECTION HEADER */
+.sstrip{background:var(--cream);border-bottom:3px solid var(--gold);padding:26px 72px;display:flex;align-items:center;justify-content:space-between}
+.sstrip .sn{font-family:'DM Mono',monospace;font-size:12px;color:var(--smoke);letter-spacing:.2em;margin-bottom:8px;font-weight:500}
+.sstrip h2{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:var(--navy)}
+.bdgs{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.cpg{background:var(--cream);padding-bottom:88px}
+.inner{padding:60px 72px}
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase}
+.bg{background:var(--navy);color:var(--gold)}
+.bi{background:#dbeafe;color:#1d40af}
+.bb{background:#dcfce7;color:#166534}
+.bd{background:#ffedd5;color:#9a3412}
+/* COMPARE */
+.cmp{display:grid;grid-template-columns:1fr 5px 1fr;margin:44px 0;border:2px solid var(--navy);border-radius:24px;overflow:hidden}
+.cmpsep{background:linear-gradient(to bottom,var(--navy),var(--gold))}
+.cmpc{padding:48px 44px}
+.cmpc.gaap{background:var(--navy);color:white}
+.cmpc.ifrs{background:white}
+.cmptag{font-size:12px;letter-spacing:.25em;text-transform:uppercase;font-weight:700;margin-bottom:20px;display:flex;align-items:center;gap:9px}
+.cmpdot{width:7px;height:7px;border-radius:50%}
+.cmpc.gaap .cmptag{color:var(--gold)}.cmpc.gaap .cmpdot{background:var(--gold)}
+.cmpc.ifrs .cmptag{color:var(--blue)}.cmpc.ifrs .cmpdot{background:var(--blue)}
+.cmpc h3{font-family:'Playfair Display',serif;font-size:26px;margin-bottom:18px}
+.cmpc.gaap h3{color:white}.cmpc.ifrs h3{color:var(--navy)}
+.cmpc p{font-size:15px;line-height:1.8}.cmpc.gaap p{color:rgba(255,255,255,.8)}.cmpc.ifrs p{color:#444}
+/* TABLE */
+.ftbl{width:100%;border-collapse:collapse;font-size:14px}
+.ftbl thead tr{background:var(--ink);color:white}
+.ftbl th{padding:17px 22px;text-align:left;font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-family:'DM Mono',monospace;font-weight:500}
+.ftbl td{padding:16px 22px;border-bottom:1px solid rgba(0,0,0,.07);line-height:1.5}
+.ftbl tr:nth-child(even) td{background:rgba(0,0,0,.025)}
+.ftbl tr:hover td{background:rgba(201,151,58,.06)}
+.ftbl td:first-child{font-weight:600;color:var(--navy)}
+.dp{display:inline-block;padding:4px 13px;border-radius:20px;font-size:12px;font-weight:700}
+.dp.same{background:#e8f5e9;color:#1a5c32}.dp.diff{background:#fff3e0;color:#b84d00}.dp.conf{background:#fce4ec;color:#9b1c1c}
+/* ILLUS */
+.illus{background:var(--navy);border-radius:28px;overflow:hidden;display:flex;margin:36px 0}
+.illusc{flex:1;padding:52px}
+.illusa{width:290px;flex-shrink:0;background:linear-gradient(135deg,#1a2d6b,#06091f)}
+/* TOPIC GRID */
+.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin:44px 0}
+.tcard{background:white;border-radius:22px;padding:32px;border:1.5px solid rgba(0,0,0,.07);transition:all .3s;position:relative;overflow:hidden;cursor:pointer}
+.tcard:hover{transform:translateY(-5px);box-shadow:0 20px 48px rgba(0,0,0,.12);border-color:var(--gold)}
+.tcard::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(to right,var(--navy),var(--gold));transform:scaleX(0);transition:.3s;transform-origin:left}
+.tcard:hover::before{transform:scaleX(1)}
+.tico{width:54px;height:54px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:18px}
+.tlbl{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--smoke);margin-bottom:10px;font-weight:600}
+.ttit{font-family:'Playfair Display',serif;font-size:19px;color:var(--navy);font-weight:700;line-height:1.3}
+.tdesc{font-size:14px;color:var(--smoke);margin-top:10px;line-height:1.65}
+/* CALLOUT */
+.callout{border-left:5px solid var(--gold);background:rgba(201,151,58,.08);padding:24px 28px;border-radius:0 14px 14px 0;font-size:15px;line-height:1.8;color:var(--ink);margin:28px 0}
+.callout strong{color:var(--navy)}
+/* TIMELINE */
+.tline{position:relative;padding-left:38px;margin:28px 0}
+.tline::before{content:'';position:absolute;left:0;top:8px;bottom:8px;width:2.5px;background:linear-gradient(to bottom,var(--navy),var(--gold))}
+.tli{position:relative;margin-bottom:34px}
+.tlidot{position:absolute;left:-44px;top:2px;width:14px;height:14px;border-radius:50%;border:2.5px solid var(--navy);background:white}
+.tli.act .tlidot{background:var(--gold);border-color:var(--gold)}
+.tlilbl{font-size:12px;letter-spacing:.14em;color:var(--smoke);text-transform:uppercase;margin-bottom:6px;font-weight:600}
+.tli p{font-size:14px;color:var(--ink);line-height:1.65}
+/* ACCORDION */
+.acc{border-bottom:1.5px solid rgba(0,0,0,.08)}
+.acch{display:flex;align-items:center;justify-content:space-between;padding:20px 0;cursor:pointer;font-size:15px;font-weight:600;color:var(--navy);transition:.2s}
+.acch:hover{color:var(--gold)}
+.acci{transition:.3s;font-size:14px;color:var(--smoke)}
+.acc.on .acch .acci{transform:rotate(45deg);color:var(--gold)}
+.accb{display:none;padding-bottom:22px;font-size:14px;line-height:1.8;color:#444}
+.acc.on .accb{display:block}
+/* FLASHCARDS */
+#fcsec{background:var(--ink);padding:88px 72px;color:white;position:relative;overflow:hidden}
+#fcsec::before{content:'STUDY';position:absolute;right:-20px;top:50%;transform:translateY(-50%);font-family:'Playfair Display',serif;font-size:220px;font-weight:900;opacity:.025;pointer-events:none}
+.fchd{display:flex;align-items:center;justify-content:space-between;margin-bottom:48px}
+.fctit{font-family:'Playfair Display',serif;font-size:42px;font-weight:700}
+.fcctr{font-family:'DM Mono',monospace;font-size:15px;color:rgba(255,255,255,.55)}
+.fcstage{perspective:1200px;height:300px;cursor:pointer;max-width:700px}
+.fccard{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .6s cubic-bezier(.4,0,.2,1);border-radius:26px}
+.fccard.flip{transform:rotateY(180deg)}
+.fcface{position:absolute;inset:0;backface-visibility:hidden;border-radius:26px;padding:44px 52px;display:flex;flex-direction:column;justify-content:space-between}
+.fcfront{background:linear-gradient(135deg,#1a2d6b,#0f1e45);border:1px solid rgba(201,151,58,.3)}
+.fcback{background:linear-gradient(135deg,#b8811f,#7a5118);transform:rotateY(180deg)}
+.fctag{font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);font-weight:700}
+.fcback .fctag{color:rgba(255,255,255,.7)}
+.fcq{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;line-height:1.35;color:white;margin-top:16px}
+.fchint{font-size:14px;color:rgba(255,255,255,.45)}
+.fca{font-size:15px;line-height:1.75;color:rgba(255,255,255,.92)}
+.fca strong{color:white;display:block;margin-bottom:8px;font-size:20px;font-family:'Playfair Display',serif}
+.fcnav{display:flex;align-items:center;gap:16px;margin-top:28px}
+.fcbtn{background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);color:white;padding:13px 26px;border-radius:13px;cursor:pointer;font-size:14px;font-weight:600;transition:all .2s;font-family:'DM Sans',sans-serif}
+.fcbtn:hover{background:var(--gold);border-color:var(--gold);color:var(--navy)}
+.fcprog{display:flex;gap:5px;margin-left:auto}
+.fcpip{width:26px;height:5px;border-radius:3px;background:rgba(255,255,255,.15);transition:all .3s}
+.fcpip.done{background:var(--gold)}.fcpip.now{background:white;width:34px}
+/* QUIZ */
+#quizsec{background:var(--mist);padding:88px 72px}
+.qh{font-family:'Playfair Display',serif;font-size:42px;font-weight:700;color:var(--navy);margin-bottom:10px}
+.qsub{font-size:16px;color:var(--smoke);margin-bottom:48px}
+.qcard{background:white;border-radius:24px;padding:48px;box-shadow:0 4px 28px rgba(0,0,0,.07)}
+.qnum{font-family:'DM Mono',monospace;font-size:13px;color:var(--smoke);letter-spacing:.2em;margin-bottom:14px}
+.qtxt{font-family:'Playfair Display',serif;font-size:23px;line-height:1.45;color:var(--navy);margin-bottom:32px}
+.qopts{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.qopt{padding:18px 22px;border:2px solid rgba(0,0,0,.1);border-radius:16px;cursor:pointer;transition:all .2s;font-size:14px;font-weight:500;background:white;text-align:left;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:12px}
+.qopt:hover:not(.dis){border-color:var(--navy);background:var(--mist)}
+.qltr{width:28px;height:28px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.qopt.correct{background:#e8f5e9;border-color:var(--green);color:var(--green);font-weight:700}
+.qopt.wrong{background:#fce4ec;border-color:var(--red);color:var(--red)}
+.qopt.dis{pointer-events:none}
+.qexp{margin-top:28px;padding:24px 28px;background:var(--navy);color:white;border-radius:16px;font-size:15px;line-height:1.75;display:none}
+.qexp.show{display:block}
+.qexp strong{color:var(--glt)}
+.qnav{display:flex;align-items:center;justify-content:space-between;margin-top:36px}
+.qsc{font-family:'DM Mono',monospace;font-size:14px;color:var(--smoke)}
+.qnxt{background:var(--navy);color:white;padding:14px 32px;border-radius:13px;border:none;cursor:pointer;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;transition:all .2s;display:none}
+.qnxt.show{display:block}
+.qnxt:hover{background:var(--gold);color:var(--navy)}
+#sscrn{text-align:center;padding:64px;display:none}
+#sscrn.show{display:block}
+.sring{width:180px;height:180px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 36px;font-family:'Playfair Display',serif;font-size:42px;font-weight:700;color:var(--navy);position:relative}
+.sring::before{content:'';position:absolute;inset:14px;background:white;border-radius:50%}
+.snum{position:relative;z-index:1}
+/* AI */
+#aip{position:fixed;right:24px;bottom:24px;width:420px;background:white;border-radius:28px;box-shadow:0 32px 64px rgba(0,0,0,.2);border:1px solid rgba(0,0,0,.08);overflow:hidden;display:flex;flex-direction:column;transform:scale(.95) translateY(20px);opacity:0;pointer-events:none;transition:all .3s cubic-bezier(.4,0,.2,1);z-index:500;max-height:600px}
+#aip.open{transform:scale(1) translateY(0);opacity:1;pointer-events:all}
+.aiphd{background:var(--navy);padding:22px 26px;display:flex;align-items:center;gap:14px}
+.aipav{width:40px;height:40px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.aipinfo{flex:1}
+.aipinfo h4{font-size:16px;font-weight:700;color:white;font-family:'Playfair Display',serif}
+.aipinfo p{font-size:12px;color:rgba(255,255,255,.55);margin-top:2px}
+.aipx{width:32px;height:32px;background:rgba(255,255,255,.12);border-radius:50%;border:none;cursor:pointer;color:white;font-size:14px;display:flex;align-items:center;justify-content:center;transition:.2s}
+.aipx:hover{background:rgba(255,255,255,.22)}
+.aipmsgs{flex:1;overflow-y:auto;padding:22px;display:flex;flex-direction:column;gap:14px;min-height:280px;max-height:380px}
+.amsg{max-width:88%;font-size:14px;line-height:1.65;padding:14px 18px;border-radius:18px}
+.amsg.u{background:var(--navy);color:white;align-self:flex-end;border-bottom-right-radius:4px}
+.amsg.b{background:var(--mist);color:var(--ink);align-self:flex-start;border-bottom-left-radius:4px;border:1px solid rgba(0,0,0,.07)}
+.atyp{display:flex;gap:5px;padding:14px 18px;background:var(--mist);border-radius:18px;border-bottom-left-radius:4px;align-self:flex-start;border:1px solid rgba(0,0,0,.07);width:65px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--smoke);animation:bounce .9s infinite}
+.dot:nth-child(2){animation-delay:.15s}.dot:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-7px)}}
+.aiprow{padding:18px;border-top:1px solid rgba(0,0,0,.07);display:flex;gap:9px}
+.ainp{flex:1;padding:12px 18px;border:2px solid rgba(0,0,0,.1);border-radius:13px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;transition:.2s}
+.ainp:focus{border-color:var(--navy)}
+.asend{width:44px;height:44px;background:var(--navy);color:white;border:none;border-radius:13px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:.2s;flex-shrink:0}
+.asend:hover{background:var(--gold);color:var(--navy)}
+#fab{position:fixed;right:24px;bottom:24px;width:64px;height:64px;background:var(--navy);border-radius:50%;border:2.5px solid var(--gold);cursor:pointer;z-index:499;display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--gold);box-shadow:0 8px 32px rgba(0,0,0,.28);transition:all .3s}
+#fab:hover{transform:scale(1.1);background:var(--gold);color:var(--navy)}
+#fab.hide{opacity:0;pointer-events:none}
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s ease}
+.reveal.vis{opacity:1;transform:translateY(0)}
+.rd1{transition-delay:.12s}.rd2{transition-delay:.24s}
+footer{background:var(--navy);padding:56px 72px;display:flex;align-items:center;justify-content:space-between;border-top:4px solid var(--gold)}
+footer .brand{font-family:'Playfair Display',serif;font-size:24px;color:white;font-weight:700}
+footer .brand span{color:var(--gold)}
+footer .fp{font-size:14px;color:rgba(255,255,255,.6);margin-top:6px}
+footer .fp2{font-size:12px;color:rgba(255,255,255,.35);margin-top:4px}
+.flinks{display:flex;gap:28px;flex-wrap:wrap}
+.flinks a{font-size:14px;color:rgba(255,255,255,.55);text-decoration:none;transition:.2s}
+.flinks a:hover{color:var(--gold)}
+@media print{#sb,#aip,#fab,.dlstrip,#fcsec,#quizsec{display:none!important}main{margin-left:0}.cpg{background:white}body::before{display:none}}
+@media(max-width:900px){#sb{display:none}main{margin-left:0}#p1{grid-template-columns:1fr}.cvr{display:none}.cmp{grid-template-columns:1fr}.cmpsep{height:5px;width:100%}.tgrid,.qopts,.statband{grid-template-columns:1fr}.inner,.sstrip,.cvl,.dlstrip{padding:32px 24px}}
+</style>
+</head>
+<body>
+<div class="cur-dot" id="cd"></div>
+<div class="cur-ring" id="cr"></div>
+<div id="rp"><div id="rb"></div></div>
+
+<nav id="sb">
+  <div class="slogo">SegWay Accountants</div>
+  <div class="spills">
+    <a href="#p1" class="spill on">01</a>
+    <a href="#p2" class="spill">02</a>
+    <a href="#p3" class="spill">03</a>
+    <a href="#p4" class="spill">04</a>
+    <a href="#p5" class="spill">05</a>
+    <a href="#p6" class="spill">06</a>
+    <a href="#p7" class="spill">07</a>
+    <a href="#fcsec" class="spill">FC</a>
+  </div>
+</nav>
+
+<main>
+<!-- COVER -->
+<section id="p1">
+  <div class="cvl">
+    <div>
+      <div class="cvey">SegWay Accountants Ltd · 2026 Edition</div>
+      <h1 class="cvtit">IFRS<br><em>×</em>US GAAP</h1>
+      <p class="cvsub">The definitive reconciliation guide for multinational reporting professionals — 7 technical sections, interactive flashcards, and AI-powered study assistance.</p>
+    </div>
+    <div class="cvmeta">
+      <div class="cvbadge"><span class="num">8</span><span class="lbl">Sections</span></div>
+      <div class="cvsep"></div>
+      <div class="cvbadge"><span class="num">40+</span><span class="lbl">Flashcards</span></div>
+      <div class="cvsep"></div>
+      <div class="cvbadge"><span class="num">2026</span><span class="lbl">Standards</span></div>
+      <div class="cvsep"></div>
+      <div class="cvbadge"><span class="num">AI</span><span class="lbl">Tutor</span></div>
+    </div>
+  </div>
+  <div class="cvr">
+    <svg width="380" height="380" viewBox="0 0 380 380" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="gg" cx="38%" cy="32%" r="62%">
+          <stop offset="0%" stop-color="#2d4fa3"/><stop offset="100%" stop-color="#06091f"/>
+        </radialGradient>
+        <filter id="gw"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <circle cx="190" cy="190" r="178" fill="none" stroke="rgba(201,151,58,.12)" stroke-width="1"/>
+      <circle cx="190" cy="190" r="148" fill="url(#gg)"/>
+      <ellipse cx="190" cy="190" rx="148" ry="56" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="1"/>
+      <ellipse cx="190" cy="190" rx="148" ry="102" fill="none" stroke="rgba(255,255,255,.09)" stroke-width="1"/>
+      <line x1="190" y1="42" x2="190" y2="338" stroke="rgba(255,255,255,.1)" stroke-width="1"/>
+      <line x1="42" y1="190" x2="338" y2="190" stroke="rgba(255,255,255,.1)" stroke-width="1"/>
+      <ellipse cx="190" cy="190" rx="82" ry="148" fill="none" stroke="rgba(255,255,255,.09)" stroke-width="1"/>
+      <path d="M128,118 Q150,108 172,118 Q188,128 184,150 Q178,167 161,172 Q139,177 126,162 Q115,145 128,118Z" fill="rgba(255,255,255,.22)"/>
+      <path d="M198,126 Q230,112 252,122 Q268,133 263,155 Q258,172 242,177 Q220,180 204,167 Q193,150 198,126Z" fill="rgba(255,255,255,.18)"/>
+      <path d="M148,198 Q174,186 200,198 Q216,208 212,228 Q207,244 186,252 Q164,256 148,242 Q132,228 148,198Z" fill="rgba(255,255,255,.2)"/>
+      <path d="M224,202 Q246,193 262,204 Q273,214 268,230 Q263,242 248,244 Q232,246 224,234 Q216,220 224,202Z" fill="rgba(255,255,255,.16)"/>
+      <circle cx="190" cy="190" r="148" fill="none" stroke="rgba(201,151,58,.35)" stroke-width="2"/>
+      <circle cx="190" cy="44" r="5" fill="var(--gold)" filter="url(#gw)"/>
+      <circle cx="190" cy="336" r="5" fill="var(--gold)" filter="url(#gw)"/>
+      <ellipse cx="190" cy="190" rx="172" ry="42" fill="none" stroke="rgba(201,151,58,.45)" stroke-width="1.5" stroke-dasharray="9 5" style="animation:orb 9s linear infinite;transform-origin:190px 190px;transform-box:fill-box"/>
+      <text x="190" y="186" text-anchor="middle" fill="white" font-family="Playfair Display,serif" font-size="18" font-weight="700">GLOBAL</text>
+      <text x="190" y="207" text-anchor="middle" fill="rgba(201,151,58,.92)" font-family="DM Mono,monospace" font-size="13">STANDARDS</text>
+      <circle cx="154" cy="130" r="4" fill="#6ee7b7" filter="url(#gw)"/>
+      <circle cx="244" cy="143" r="4" fill="#6ee7b7" filter="url(#gw)"/>
+      <circle cx="174" cy="222" r="4" fill="#fbbf24" filter="url(#gw)"/>
+      <circle cx="252" cy="217" r="4" fill="#fbbf24" filter="url(#gw)"/>
+    </svg>
+    <style>@keyframes orb{from{transform:rotateX(65deg) rotateZ(0)}to{transform:rotateX(65deg) rotateZ(360deg)}}</style>
+    <div class="ftag ft1">⚖ ASC 842</div>
+    <div class="ftag ft2">📋 IFRS 16</div>
+    <div class="ftag ft3">💰 IAS 12</div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="statband reveal">
+  <div class="statcell"><span class="statn">140+</span><span class="statl">Standards Covered</span></div>
+  <div class="statcell"><span class="statn">$18T</span><span class="statl">Assets Under These Rules</span></div>
+  <div class="statcell"><span class="statn">168</span><span class="statl">IFRS Jurisdictions</span></div>
+  <div class="statcell"><span class="statn">CPD</span><span class="statl">8.0 Units Eligible</span></div>
+</div>
+<div class="dlstrip">
+  <p>📥 Download the full reference pack as PDF — study offline anytime.</p>
+  <button class="dlbtn" onclick="window.print()"><i class="fa-solid fa-file-pdf"></i> &nbsp;Download PDF</button>
+</div>
+
+<!-- PAGE 2: PRESENTATION -->
+<section class="cpg" id="p2">
+  <div class="sstrip">
+    <div><div class="sn">Section 02</div><h2>Financial Statement Presentation</h2></div>
+    <div class="bdgs"><span class="badge bg">ASC 210</span><span class="badge bi">IAS 1</span></div>
+  </div>
+  <div class="inner">
+    <div class="cmp reveal">
+      <div class="cmpc gaap">
+        <div class="cmptag"><div class="cmpdot"></div>US GAAP — ASC 210</div>
+        <h3>Liquidity-First Order</h3>
+        <p>Assets and liabilities are presented in <strong style="color:var(--glt)">decreasing order of liquidity</strong>. Cash always leads, non-current assets appear last. Creditor-oriented and prescriptive.</p>
+        <div style="margin-top:30px">
+          <svg width="100%" height="170" viewBox="0 0 310 170" xmlns="http://www.w3.org/2000/svg">
+            <text x="0" y="15" fill="rgba(255,255,255,.55)" font-size="12" font-family="DM Mono,monospace" font-weight="600" letter-spacing="2">BALANCE SHEET ORDER</text>
+            <rect x="0" y="26" width="200" height="26" rx="6" fill="rgba(201,151,58,.9)"/>
+            <text x="11" y="43" fill="#0f1e45" font-size="13" font-family="DM Mono,monospace" font-weight="700">Cash &amp; Equivalents</text>
+            <rect x="0" y="58" width="162" height="24" rx="6" fill="rgba(201,151,58,.65)"/>
+            <text x="11" y="74" fill="white" font-size="13" font-family="DM Mono,monospace">Accounts Receivable</text>
+            <rect x="0" y="88" width="128" height="24" rx="6" fill="rgba(201,151,58,.42)"/>
+            <text x="11" y="104" fill="white" font-size="13" font-family="DM Mono,monospace">Inventory</text>
+            <rect x="0" y="118" width="96" height="24" rx="6" fill="rgba(201,151,58,.24)"/>
+            <text x="11" y="134" fill="rgba(255,255,255,.8)" font-size="13" font-family="DM Mono,monospace">Prepaid Expenses</text>
+            <rect x="0" y="148" width="64" height="20" rx="6" fill="rgba(201,151,58,.13)"/>
+            <text x="11" y="162" fill="rgba(255,255,255,.55)" font-size="12" font-family="DM Mono,monospace">PPE, net</text>
+            <text x="212" y="40" fill="rgba(201,151,58,.9)" font-size="12" font-family="DM Sans,sans-serif" font-weight="600">Most Liquid ↑</text>
+            <text x="212" y="158" fill="rgba(255,255,255,.4)" font-size="12" font-family="DM Sans,sans-serif">Least Liquid ↓</text>
+          </svg>
+        </div>
+      </div>
+      <div class="cmpsep"></div>
+      <div class="cmpc ifrs">
+        <div class="cmptag"><div class="cmpdot"></div>IFRS — IAS 1</div>
+        <h3>Reverse Liquidity Common</h3>
+        <p>No format is <em>mandated</em>. Common practice presents <strong style="color:var(--blue)">non-current items first</strong> — PPE before cash. Reflects an owner/investor perspective on long-term assets.</p>
+        <div style="margin-top:30px">
+          <svg width="100%" height="170" viewBox="0 0 310 170" xmlns="http://www.w3.org/2000/svg">
+            <text x="0" y="15" fill="rgba(0,0,0,.4)" font-size="12" font-family="DM Mono,monospace" font-weight="600" letter-spacing="2">BALANCE SHEET ORDER</text>
+            <rect x="0" y="26" width="188" height="26" rx="6" fill="rgba(37,99,235,.85)"/>
+            <text x="11" y="43" fill="white" font-size="13" font-family="DM Mono,monospace" font-weight="700">PPE (Non-Current)</text>
+            <rect x="0" y="58" width="156" height="24" rx="6" fill="rgba(37,99,235,.6)"/>
+            <text x="11" y="74" fill="white" font-size="13" font-family="DM Mono,monospace">Intangible Assets</text>
+            <rect x="0" y="88" width="124" height="24" rx="6" fill="rgba(37,99,235,.38)"/>
+            <text x="11" y="104" fill="white" font-size="13" font-family="DM Mono,monospace">Inventories</text>
+            <rect x="0" y="118" width="94" height="24" rx="6" fill="rgba(37,99,235,.22)"/>
+            <text x="11" y="134" fill="rgba(0,0,60,.7)" font-size="13" font-family="DM Mono,monospace">Trade Receivables</text>
+            <rect x="0" y="148" width="64" height="20" rx="6" fill="rgba(37,99,235,.1)"/>
+            <text x="11" y="162" fill="rgba(0,0,60,.45)" font-size="12" font-family="DM Mono,monospace">Cash &amp; Equiv.</text>
+            <text x="198" y="40" fill="rgba(37,99,235,.85)" font-size="12" font-family="DM Sans,sans-serif" font-weight="600">Non-Current ↑</text>
+            <text x="198" y="158" fill="rgba(0,0,0,.3)" font-size="12" font-family="DM Sans,sans-serif">Current ↓</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="reveal rd1" style="overflow:hidden;border-radius:18px;border:2px solid rgba(0,0,0,.08);margin-top:36px">
+      <table class="ftbl">
+        <thead><tr><th style="width:28%">Feature</th><th>US GAAP</th><th>IFRS</th><th style="width:130px">Status</th></tr></thead>
+        <tbody>
+          <tr><td>Comprehensive Income</td><td>One or two-statement permitted</td><td>One or two-statement permitted</td><td><span class="dp same">Converged</span></td></tr>
+          <tr><td>Extraordinary Items</td><td>Prohibited (ASU 2015-01)</td><td>Prohibited</td><td><span class="dp same">Converged</span></td></tr>
+          <tr><td>Deferred Taxes on BS</td><td>Non-current only</td><td>Non-current only</td><td><span class="dp same">Converged</span></td></tr>
+          <tr><td>Bank Overdrafts</td><td>Financing liability</td><td>Cash component (demand-repayable)</td><td><span class="dp diff">Different</span></td></tr>
+          <tr><td>Offsetting</td><td>Strict criteria (ASC 210-20)</td><td>Strict criteria (IAS 32), slightly broader</td><td><span class="dp diff">Different</span></td></tr>
+          <tr><td>Interim Reporting</td><td>ASC 270 — discrete method</td><td>IAS 34 — integral method</td><td><span class="dp conf">Conflict</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout reveal rd2">
+      <strong>Key Exam Insight:</strong> IAS 1 allows <em>any</em> presentation format provided the financial statements give a "true and fair view." US GAAP follows prescriptive rules — this principles-vs-rules difference underpins virtually every divergence in this guide.
+    </div>
+  </div>
+</section>
+
+<!-- PAGE 3: INVENTORY -->
+<section class="cpg" id="p3">
+  <div class="sstrip">
+    <div><div class="sn">Section 03</div><h2>Inventory &amp; Fixed Assets</h2></div>
+    <div class="bdgs"><span class="badge bg">ASC 330</span><span class="badge bi">IAS 2 / IAS 16</span></div>
+  </div>
+  <div class="inner">
+    <div class="illus reveal">
+      <div class="illusc">
+        <div style="font-size:13px;letter-spacing:.22em;color:rgba(255,255,255,.65);text-transform:uppercase;font-weight:700;margin-bottom:16px">The LIFO Conflict</div>
+        <h3 style="font-family:'Playfair Display',serif;font-size:30px;color:white;margin-bottom:20px;line-height:1.2">The Single Biggest<br><em style="color:var(--glt)">Inventory Difference</em></h3>
+        <p style="font-size:15px;color:rgba(255,255,255,.82);line-height:1.8;max-width:400px">LIFO is <strong style="color:white">permitted and widely used under US GAAP</strong> to reduce taxable income during inflation. The LIFO Conformity Rule means if used for tax, it must also apply to financial statements.</p>
+        <p style="font-size:15px;color:rgba(255,255,255,.82);line-height:1.8;max-width:400px;margin-top:14px">IFRS strictly <strong style="color:var(--glt)">prohibits LIFO</strong> under IAS 2, creating material COGS and net income differences between the two frameworks.</p>
+        <div style="display:flex;gap:16px;margin-top:30px">
+          <div style="background:rgba(255,255,255,.1);border:2px solid rgba(201,151,58,.4);border-radius:14px;padding:20px;flex:1">
+            <div style="font-size:12px;letter-spacing:.2em;color:var(--glt);text-transform:uppercase;margin-bottom:10px;font-weight:700">US GAAP Allows</div>
+            <div style="font-size:16px;font-weight:700;color:white">FIFO · LIFO · Avg. Cost</div>
+          </div>
+          <div style="background:rgba(255,255,255,.1);border:2px solid rgba(147,197,253,.4);border-radius:14px;padding:20px;flex:1">
+            <div style="font-size:12px;letter-spacing:.2em;color:#93c5fd;text-transform:uppercase;margin-bottom:10px;font-weight:700">IFRS Allows</div>
+            <div style="font-size:16px;font-weight:700;color:white">FIFO · Weighted Avg.</div>
+          </div>
+        </div>
+      </div>
+      <div class="illusa">
+        <svg width="290" height="360" viewBox="0 0 290 360" xmlns="http://www.w3.org/2000/svg">
+          <text x="145" y="28" text-anchor="middle" fill="rgba(255,255,255,.3)" font-family="Playfair Display,serif" font-size="14" font-weight="700" letter-spacing="5">INVENTORY STACK</text>
+          <g transform="translate(20,44)">
+            <rect x="0" y="182" width="210" height="40" rx="7" fill="rgba(37,99,235,.3)" stroke="rgba(37,99,235,.6)" stroke-width="1.5"/>
+            <text x="105" y="206" text-anchor="middle" fill="rgba(255,255,255,.85)" font-size="13" font-family="DM Mono,monospace" font-weight="500">OLDEST — $8.00/unit</text>
+            <rect x="15" y="134" width="180" height="40" rx="7" fill="rgba(37,99,235,.44)" stroke="rgba(37,99,235,.7)" stroke-width="1.5"/>
+            <text x="105" y="158" text-anchor="middle" fill="rgba(255,255,255,.9)" font-size="13" font-family="DM Mono,monospace">$9.50/unit</text>
+            <rect x="30" y="86" width="150" height="40" rx="7" fill="rgba(201,151,58,.4)" stroke="rgba(201,151,58,.7)" stroke-width="1.5"/>
+            <text x="105" y="110" text-anchor="middle" fill="rgba(255,255,255,.92)" font-size="13" font-family="DM Mono,monospace">$11.00/unit</text>
+            <rect x="45" y="38" width="120" height="40" rx="7" fill="rgba(201,151,58,.78)" stroke="var(--gold)" stroke-width="2"/>
+            <text x="105" y="62" text-anchor="middle" fill="white" font-size="13" font-family="DM Mono,monospace" font-weight="700">NEWEST — $13.50</text>
+            <!-- Side labels -->
+            <text x="234" y="54" fill="var(--glt)" font-size="13" font-family="DM Mono,monospace" font-weight="700">LIFO</text>
+            <text x="234" y="70" fill="var(--glt)" font-size="12" font-family="DM Mono,monospace">→ sells</text>
+            <text x="234" y="84" fill="var(--glt)" font-size="12" font-family="DM Mono,monospace">first</text>
+            <text x="234" y="198" fill="#93c5fd" font-size="13" font-family="DM Mono,monospace" font-weight="700">FIFO</text>
+            <text x="234" y="214" fill="#93c5fd" font-size="12" font-family="DM Mono,monospace">→ sells</text>
+            <text x="234" y="228" fill="#93c5fd" font-size="12" font-family="DM Mono,monospace">first</text>
+          </g>
+          <rect x="16" y="308" width="14" height="14" rx="4" fill="rgba(201,151,58,.78)"/>
+          <text x="36" y="320" fill="rgba(255,255,255,.78)" font-size="13" font-family="DM Sans,sans-serif">LIFO (US GAAP only)</text>
+          <rect x="172" y="308" width="14" height="14" rx="4" fill="rgba(37,99,235,.55)"/>
+          <text x="192" y="320" fill="rgba(255,255,255,.78)" font-size="13" font-family="DM Sans,sans-serif">FIFO (both)</text>
+        </svg>
+      </div>
+    </div>
+    <h3 style="font-family:'Playfair Display',serif;font-size:26px;color:var(--navy);margin:52px 0 24px" class="reveal">Property, Plant &amp; Equipment</h3>
+    <div class="tgrid reveal rd1">
+      <div class="tcard">
+        <div class="tico" style="background:#fff3e0">📐</div>
+        <div class="tlbl">Measurement After Recognition</div>
+        <div class="ttit">Revaluation Model</div>
+        <div class="tdesc">IFRS <em>permits</em> upward revaluation to fair value, surplus to OCI. US GAAP requires the <strong>Cost Model only</strong> — no upward revaluation ever allowed.</div>
+        <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap"><span class="badge bi">IFRS: Permitted</span><span class="badge bd">GAAP: Prohibited</span></div>
+      </div>
+      <div class="tcard">
+        <div class="tico" style="background:#e8f5e9">🏗️</div>
+        <div class="tlbl">Depreciation Method</div>
+        <div class="ttit">Component Depreciation</div>
+        <div class="tdesc">IFRS <em>mandates</em> each significant part is depreciated separately (e.g. aircraft body vs. engines). US GAAP permits it but does not require it.</div>
+        <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap"><span class="badge bi">IFRS: Required</span><span class="badge bg">GAAP: Optional</span></div>
+      </div>
+      <div class="tcard">
+        <div class="tico" style="background:#fce4ec">🔻</div>
+        <div class="tlbl">Impairment</div>
+        <div class="ttit">Reversal of Impairment</div>
+        <div class="tdesc">IFRS allows impairment reversals when conditions improve (except goodwill). Under US GAAP, impairment losses on long-lived assets are <strong>permanent</strong> — no reversal.</div>
+        <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap"><span class="badge bi">IFRS: Reversible</span><span class="badge bd">GAAP: Permanent</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PAGE 4: REVENUE -->
+<section class="cpg" id="p4">
+  <div class="sstrip">
+    <div><div class="sn">Section 04</div><h2>Revenue Recognition</h2></div>
+    <div class="bdgs"><span class="badge bg">ASC 606</span><span class="badge bi">IFRS 15</span><span class="badge bb">Converged</span></div>
+  </div>
+  <div class="inner">
+    <div class="reveal" style="background:var(--navy);border-radius:26px;padding:52px;margin-bottom:48px">
+      <div style="text-align:center;margin-bottom:44px">
+        <div style="font-size:13px;letter-spacing:.26em;color:var(--gold);text-transform:uppercase;font-weight:700;margin-bottom:12px">The Unified Framework — ASC 606 &amp; IFRS 15</div>
+        <h3 style="font-family:'Playfair Display',serif;font-size:32px;color:white">The 5-Step Revenue Model</h3>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px">
+        <div style="text-align:center;padding:22px 12px;background:rgba(255,255,255,.07);border:1px solid rgba(201,151,58,.25);border-radius:16px">
+          
+          <div style="font-size:14px;font-weight:700;color:white;margin-bottom:6px">Identify</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.65)">The Contract</div>
+        </div>
+        <div style="text-align:center;padding:22px 12px;background:rgba(255,255,255,.07);border:1px solid rgba(201,151,58,.25);border-radius:16px">
+          
+          <div style="font-size:14px;font-weight:700;color:white;margin-bottom:6px">Identify</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.65)">Obligations</div>
+        </div>
+        <div style="text-align:center;padding:22px 12px;background:rgba(201,151,58,.18);border:2px solid var(--gold);border-radius:16px">
+          
+          <div style="font-size:14px;font-weight:700;color:white;margin-bottom:6px">Determine</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.75)">The Price</div>
+        </div>
+        <div style="text-align:center;padding:22px 12px;background:rgba(255,255,255,.07);border:1px solid rgba(201,151,58,.25);border-radius:16px">
+          
+          <div style="font-size:14px;font-weight:700;color:white;margin-bottom:6px">Allocate</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.65)">The Price</div>
+        </div>
+        <div style="text-align:center;padding:22px 12px;background:rgba(26,107,74,.3);border:2px solid rgba(26,107,74,.7);border-radius:16px">
+          
+          <div style="font-size:14px;font-weight:700;color:white;margin-bottom:6px">Recognise</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.75)">Revenue</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:36px" class="reveal rd1">
+      <div>
+        <h4 style="font-family:'Playfair Display',serif;font-size:22px;color:var(--navy);margin-bottom:20px">Variable Consideration</h4>
+        <div class="acc on"><div class="acch" onclick="toggleAcc(this)"><span>US GAAP — ASC 606</span><i class="fa-solid fa-plus acci"></i></div><div class="accb">Requires assessment of whether a <strong>"significant reversal"</strong> of cumulative revenue is <em>unlikely</em> to occur. Quantitative guidance in ASC 606-10-32-11.</div></div>
+        <div class="acc"><div class="acch" onclick="toggleAcc(this)"><span>IFRS 15 Approach</span><i class="fa-solid fa-plus acci"></i></div><div class="accb">Focuses on whether it is <strong>"highly probable"</strong> no significant reversal will occur. "Highly probable" implies a higher confidence threshold in practice than "unlikely to reverse."</div></div>
+        <div class="acc"><div class="acch" onclick="toggleAcc(this)"><span>Licenses of Intellectual Property</span><i class="fa-solid fa-plus acci"></i></div><div class="accb">Both distinguish "right to access" (over time) vs "right to use" (point in time). IFRS 15 provides slightly different indicators, leading to divergent outcomes for symbolic IP licences.</div></div>
+      </div>
+      <div>
+        <h4 style="font-family:'Playfair Display',serif;font-size:22px;color:var(--navy);margin-bottom:20px">Collectability Thresholds</h4>
+        <div style="background:var(--mist);border-radius:18px;padding:30px">
+          <svg width="100%" height="158" viewBox="0 0 300 158" xmlns="http://www.w3.org/2000/svg">
+            <line x1="150" y1="18" x2="150" y2="66" stroke="var(--navy)" stroke-width="3"/>
+            <line x1="60" y1="66" x2="240" y2="66" stroke="var(--navy)" stroke-width="3.5"/>
+            <line x1="82" y1="66" x2="56" y2="98" stroke="var(--navy)" stroke-width="2.5"/>
+            <line x1="82" y1="66" x2="108" y2="98" stroke="var(--navy)" stroke-width="2.5"/>
+            <rect x="40" y="98" width="80" height="30" rx="9" fill="rgba(37,99,235,.78)"/>
+            <text x="80" y="117" text-anchor="middle" fill="white" font-size="14" font-family="DM Mono,monospace" font-weight="700">IFRS &gt;50%</text>
+            <line x1="218" y1="66" x2="192" y2="98" stroke="var(--navy)" stroke-width="2.5"/>
+            <line x1="218" y1="66" x2="244" y2="98" stroke="var(--navy)" stroke-width="2.5"/>
+            <rect x="178" y="92" width="84" height="30" rx="9" fill="rgba(201,151,58,.88)"/>
+            <text x="220" y="111" text-anchor="middle" fill="var(--navy)" font-size="14" font-family="DM Mono,monospace" font-weight="700">GAAP ~75%</text>
+            <circle cx="150" cy="13" r="11" fill="var(--navy)"/>
+            <text x="4" y="144" fill="var(--smoke)" font-size="13" font-family="DM Sans,sans-serif" font-weight="500">← Lower threshold</text>
+            <text x="162" y="144" fill="var(--smoke)" font-size="13" font-family="DM Sans,sans-serif" font-weight="500">Higher threshold →</text>
+          </svg>
+          <p style="font-size:14px;color:var(--smoke);line-height:1.65;margin-top:14px">IFRS "probable" (~50%+) means revenue can be recognised earlier for transactions with credit risk than under typical US GAAP practice (~75-80%).</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PAGE 5: LEASES -->
+<section class="cpg" id="p5">
+  <div class="sstrip">
+    <div><div class="sn">Section 05</div><h2>Lease Accounting</h2></div>
+    <div class="bdgs"><span class="badge bg">ASC 842</span><span class="badge bi">IFRS 16</span></div>
+  </div>
+  <div class="inner">
+    <div class="cmp reveal">
+      <div class="cmpc gaap">
+        <div class="cmptag"><div class="cmpdot"></div>US GAAP — ASC 842</div>
+        <h3>Dual Classification Model</h3>
+        <p>Lessee classifies leases as <strong style="color:var(--glt)">Operating</strong> or <strong style="color:var(--glt)">Finance</strong>. Operating leases show <em>straight-line rent expense</em> — no front-loading. Finance leases show interest + amortisation.</p>
+        <div style="margin-top:28px">
+          <svg width="100%" height="118" viewBox="0 0 280 118" xmlns="http://www.w3.org/2000/svg">
+            <text x="0" y="15" fill="rgba(255,255,255,.65)" font-size="13" font-family="DM Mono,monospace" font-weight="600">OPERATING LEASE — P&amp;L</text>
+            <text x="12" y="38" fill="rgba(255,255,255,.6)" font-size="12" font-family="DM Mono,monospace">Yr 1</text>
+            <text x="78" y="38" fill="rgba(255,255,255,.6)" font-size="12" font-family="DM Mono,monospace">Yr 2</text>
+            <text x="144" y="38" fill="rgba(255,255,255,.6)" font-size="12" font-family="DM Mono,monospace">Yr 3</text>
+            <text x="210" y="38" fill="rgba(255,255,255,.6)" font-size="12" font-family="DM Mono,monospace">Yr 4</text>
+            <rect x="0" y="44" width="56" height="36" rx="5" fill="rgba(201,151,58,.65)"/>
+            <rect x="66" y="44" width="56" height="36" rx="5" fill="rgba(201,151,58,.65)"/>
+            <rect x="132" y="44" width="56" height="36" rx="5" fill="rgba(201,151,58,.65)"/>
+            <rect x="198" y="44" width="56" height="36" rx="5" fill="rgba(201,151,58,.65)"/>
+            <text x="140" y="105" text-anchor="middle" fill="rgba(201,151,58,.85)" font-size="13" font-family="DM Sans,sans-serif" font-weight="600">Straight-line — flat each year</text>
+          </svg>
+        </div>
+      </div>
+      <div class="cmpsep"></div>
+      <div class="cmpc ifrs">
+        <div class="cmptag"><div class="cmpdot"></div>IFRS — IFRS 16</div>
+        <h3>Single Finance Model</h3>
+        <p style="color:#444">ALL leases treated as <strong style="color:var(--blue)">finance leases</strong>. P&amp;L shows interest (declining) + depreciation = <em>front-loaded total cost</em>. EBITDA improves; early-year net income is lower.</p>
+        <div style="margin-top:28px">
+          <svg width="100%" height="118" viewBox="0 0 280 118" xmlns="http://www.w3.org/2000/svg">
+            <text x="0" y="15" fill="rgba(0,0,0,.5)" font-size="13" font-family="DM Mono,monospace" font-weight="600">FINANCE LEASE — P&amp;L</text>
+            <text x="12" y="38" fill="rgba(0,0,0,.45)" font-size="12" font-family="DM Mono,monospace">Yr 1</text>
+            <text x="78" y="38" fill="rgba(0,0,0,.45)" font-size="12" font-family="DM Mono,monospace">Yr 2</text>
+            <text x="144" y="38" fill="rgba(0,0,0,.45)" font-size="12" font-family="DM Mono,monospace">Yr 3</text>
+            <text x="210" y="38" fill="rgba(0,0,0,.45)" font-size="12" font-family="DM Mono,monospace">Yr 4</text>
+            <rect x="0" y="20" width="56" height="62" rx="5" fill="rgba(37,99,235,.65)"/>
+            <rect x="66" y="32" width="56" height="50" rx="5" fill="rgba(37,99,235,.52)"/>
+            <rect x="132" y="44" width="56" height="38" rx="5" fill="rgba(37,99,235,.38)"/>
+            <rect x="198" y="56" width="56" height="26" rx="5" fill="rgba(37,99,235,.25)"/>
+            <text x="140" y="105" text-anchor="middle" fill="rgba(37,99,235,.85)" font-size="13" font-family="DM Sans,sans-serif" font-weight="600">Declining — front-loaded cost</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:52px" class="reveal rd1">
+      <div>
+        <h4 style="font-family:'Playfair Display',serif;font-size:22px;color:var(--navy);margin-bottom:22px">Lease Liability Re-measurement</h4>
+        <div class="tline">
+          <div class="tli act"><div class="tlidot"></div><div class="tlilbl">IFRS 16 — Frequent Triggers</div><p>Re-measure whenever there is a change in a <strong>rate or index</strong> (e.g. CPI, base rate) — creates P&amp;L volatility in high-inflation environments.</p></div>
+          <div class="tli"><div class="tlidot"></div><div class="tlilbl">ASC 842 — Limited Triggers</div><p>Re-measured only on <strong>lease modification</strong> or exercise/non-exercise of a purchase or extension option. More stable, but less reflective of economic changes.</p></div>
+          <div class="tli"><div class="tlidot"></div><div class="tlilbl">Short-term Exemption (Both)</div><p>Optional exemption for leases ≤12 months. Under IFRS 16, an additional <strong>low-value asset exemption</strong> applies (~USD 5,000 new value) — no GAAP equivalent.</p></div>
+        </div>
+      </div>
+      <div>
+        <h4 style="font-family:'Playfair Display',serif;font-size:22px;color:var(--navy);margin-bottom:22px">ASC 842 Lessee Classification</h4>
+        <div style="background:var(--mist);border-radius:18px;padding:30px">
+          <svg width="100%" height="196" viewBox="0 0 300 196" xmlns="http://www.w3.org/2000/svg">
+            <rect x="80" y="0" width="140" height="34" rx="8" fill="var(--navy)"/>
+            <text x="150" y="21" text-anchor="middle" fill="white" font-size="14" font-family="DM Mono,monospace" font-weight="600">Lease Agreement</text>
+            <line x1="150" y1="34" x2="150" y2="56" stroke="var(--smoke)" stroke-width="1.5"/>
+            <rect x="60" y="56" width="180" height="32" rx="8" fill="rgba(37,99,235,.14)" stroke="rgba(37,99,235,.45)" stroke-width="1.5"/>
+            <text x="150" y="76" text-anchor="middle" fill="var(--navy)" font-size="13" font-family="DM Mono,monospace" font-weight="600">Ownership / Bargain purchase?</text>
+            <line x1="78" y1="72" x2="28" y2="108" stroke="var(--smoke)" stroke-width="1.5" stroke-dasharray="5"/>
+            <line x1="222" y1="72" x2="274" y2="108" stroke="var(--smoke)" stroke-width="1.5" stroke-dasharray="5"/>
+            <text x="42" y="106" fill="var(--green)" font-size="13" font-family="DM Sans,sans-serif" font-weight="700">YES</text>
+            <text x="260" y="106" fill="var(--red)" font-size="13" font-family="DM Sans,sans-serif" font-weight="700">NO</text>
+            <rect x="0" y="114" width="100" height="30" rx="8" fill="rgba(201,151,58,.78)"/>
+            <text x="50" y="133" text-anchor="middle" fill="white" font-size="14" font-family="DM Mono,monospace" font-weight="700">Finance Lease</text>
+            <rect x="196" y="114" width="100" height="30" rx="8" fill="rgba(37,99,235,.65)"/>
+            <text x="246" y="133" text-anchor="middle" fill="white" font-size="14" font-family="DM Mono,monospace" font-weight="700">Test 75%/90%</text>
+            <text x="150" y="168" text-anchor="middle" fill="var(--smoke)" font-size="13" font-family="DM Sans,sans-serif">5 criteria — any one met = Finance Lease</text>
+            <text x="150" y="186" text-anchor="middle" fill="var(--smoke)" font-size="12" font-family="DM Sans,sans-serif" font-style="italic">IFRS 16: no classification test needed</text>
+          </svg>
+        </div>
+        <div class="callout" style="margin-top:18px;font-size:14px">
+          <strong>Key Insight:</strong> Under IFRS 16, the classification question is irrelevant — every lessee lease defaults to the finance model, simplifying accounting but amplifying EBITDA.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PAGE 6: TAXES -->
+<section class="cpg" id="p6">
+  <div class="sstrip">
+    <div><div class="sn">Section 06</div><h2>Income Taxes</h2></div>
+    <div class="bdgs"><span class="badge bg">ASC 740</span><span class="badge bi">IAS 12</span></div>
+  </div>
+  <div class="inner">
+    <div style="display:grid;grid-template-columns:1.15fr 1fr;gap:48px" class="reveal">
+      <div>
+        <h4 style="font-family:'Playfair Display',serif;font-size:24px;color:var(--navy);margin-bottom:24px">Uncertain Tax Positions</h4>
+        <div style="background:var(--ink);border-radius:22px;padding:36px;color:white">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px">
+            <div style="background:rgba(201,151,58,.15);border:1.5px solid rgba(201,151,58,.38);border-radius:14px;padding:20px">
+              <div style="font-size:12px;letter-spacing:.18em;color:var(--glt);text-transform:uppercase;margin-bottom:12px;font-weight:700">Step 1 — US GAAP</div>
+              <div style="font-size:15px;color:white;font-weight:700;margin-bottom:9px">Recognition</div>
+              <p style="font-size:13px;color:rgba(255,255,255,.78);line-height:1.65">More-likely-than-not (&gt;50%) position will be sustained on examination.</p>
+            </div>
+            <div style="background:rgba(201,151,58,.15);border:1.5px solid rgba(201,151,58,.38);border-radius:14px;padding:20px">
+              <div style="font-size:12px;letter-spacing:.18em;color:var(--glt);text-transform:uppercase;margin-bottom:12px;font-weight:700">Step 2 — US GAAP</div>
+              <div style="font-size:15px;color:white;font-weight:700;margin-bottom:9px">Measurement</div>
+              <p style="font-size:13px;color:rgba(255,255,255,.78);line-height:1.65">Largest amount with &gt;50% probability of being realised.</p>
+            </div>
+          </div>
+          <div style="background:rgba(37,99,235,.2);border:1.5px solid rgba(37,99,235,.45);border-radius:14px;padding:20px">
+            <div style="font-size:12px;letter-spacing:.18em;color:#93c5fd;text-transform:uppercase;margin-bottom:10px;font-weight:700">IFRS — IAS 12 + IFRIC 23</div>
+            <p style="font-size:14px;color:rgba(255,255,255,.88);line-height:1.7">Single step: recognise using <strong style="color:white">expected value</strong> (probability-weighted) or <strong style="color:white">most likely amount</strong>, whichever better predicts resolution. No separate recognition threshold.</p>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h4 style="font-family:'Playfair Display',serif;font-size:24px;color:var(--navy);margin-bottom:24px">Tax Rate for DTAs</h4>
+        <div style="background:white;border:2px solid rgba(0,0,0,.08);border-radius:18px;padding:30px;margin-bottom:20px">
+          <svg width="100%" height="112" viewBox="0 0 280 112" xmlns="http://www.w3.org/2000/svg">
+            <text x="140" y="15" text-anchor="middle" fill="var(--smoke)" font-size="12" font-family="DM Mono,monospace" font-weight="600" letter-spacing="2">ENACTED RATE TIMELINE</text>
+            <line x1="20" y1="50" x2="260" y2="50" stroke="rgba(0,0,0,.12)" stroke-width="3"/>
+            <circle cx="60" cy="50" r="11" fill="var(--navy)"/>
+            <text x="60" y="72" text-anchor="middle" fill="var(--navy)" font-size="12" font-family="DM Sans,sans-serif" font-weight="600">Proposed</text>
+            <circle cx="150" cy="50" r="11" fill="rgba(201,151,58,.85)"/>
+            <text x="150" y="72" text-anchor="middle" fill="var(--smoke)" font-size="12" font-family="DM Sans,sans-serif" font-weight="600">Sub. Enacted</text>
+            <rect x="112" y="22" width="76" height="20" rx="7" fill="rgba(201,151,58,.18)" stroke="rgba(201,151,58,.55)" stroke-width="1.5"/>
+            <text x="150" y="35" text-anchor="middle" fill="var(--gold)" font-size="12" font-family="DM Mono,monospace" font-weight="700">IFRS uses ✓</text>
+            <circle cx="240" cy="50" r="11" fill="var(--green)"/>
+            <text x="240" y="72" text-anchor="middle" fill="var(--green)" font-size="13" font-family="DM Sans,sans-serif" font-weight="700">Enacted</text>
+            <text x="240" y="86" text-anchor="middle" fill="var(--green)" font-size="12" font-family="DM Sans,sans-serif" font-weight="600">Both ✓</text>
+          </svg>
+          <p style="font-size:14px;color:var(--smoke);line-height:1.65;margin-top:14px">IFRS permits <em>substantively enacted</em> rates — a bill awaiting final assent. US GAAP requires <strong>full enactment only</strong>.</p>
+        </div>
+        <div class="callout" style="font-size:14px">
+          <strong>Intercompany Profits:</strong> IFRS uses the <em>buyer's</em> tax rate for consolidation eliminations. US GAAP uses the <em>seller's</em> rate — directly opposite, with material impact in cross-border groups.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PAGE 7: FINANCIAL INSTRUMENTS -->
+<section class="cpg" id="p7">
+  <div class="sstrip">
+    <div><div class="sn">Section 07</div><h2>Financial Instruments</h2></div>
+    <div class="bdgs"><span class="badge bg">ASC 815 / CECL</span><span class="badge bi">IFRS 9</span></div>
+  </div>
+  <div class="inner">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:36px" class="reveal">
+      <div>
+        <h4 style="font-family:'Playfair Display',serif;font-size:22px;color:var(--navy);margin-bottom:22px">IFRS 9 Classification</h4>
+        <div style="background:linear-gradient(135deg,#2d2a80,#12104a);border-radius:22px;padding:36px;color:white">
+          <p style="font-size:15px;color:rgba(255,255,255,.82);margin-bottom:24px;line-height:1.75">Classification driven by the entity's <strong style="color:white">Business Model</strong> and whether cash flows are <strong style="color:white">Solely Payments of Principal &amp; Interest (SPPI)</strong>.</p>
+          <svg width="100%" height="178" viewBox="0 0 280 178" xmlns="http://www.w3.org/2000/svg">
+            <rect x="0" y="0" width="280" height="178" rx="14" fill="rgba(0,0,0,.28)"/>
+            <text x="140" y="22" text-anchor="middle" fill="rgba(255,255,255,.6)" font-size="13" font-family="DM Mono,monospace" font-weight="600" letter-spacing="2">SPPI TEST PASS?</text>
+            <text x="74" y="38" text-anchor="middle" fill="rgba(255,255,255,.8)" font-size="14" font-family="DM Sans,sans-serif" font-weight="700">YES</text>
+            <text x="214" y="38" text-anchor="middle" fill="rgba(255,255,255,.6)" font-size="14" font-family="DM Sans,sans-serif" font-weight="700">NO</text>
+            <line x1="140" y1="26" x2="140" y2="46" stroke="rgba(255,255,255,.2)" stroke-width="1.5"/>
+            <line x1="28" y1="46" x2="252" y2="46" stroke="rgba(255,255,255,.2)" stroke-width="1.5"/>
+            <text x="74" y="64" text-anchor="middle" fill="rgba(255,255,255,.5)" font-size="12" font-family="DM Mono,monospace">BUSINESS MODEL TEST</text>
+            <rect x="8" y="72" width="82" height="32" rx="8" fill="rgba(201,151,58,.72)"/>
+            <text x="49" y="92" text-anchor="middle" fill="white" font-size="14" font-family="DM Mono,monospace" font-weight="700">Amort. Cost</text>
+            <rect x="100" y="72" width="62" height="32" rx="8" fill="rgba(99,102,241,.78)"/>
+            <text x="131" y="92" text-anchor="middle" fill="white" font-size="14" font-family="DM Mono,monospace" font-weight="700">FVOCI</text>
+            <rect x="186" y="68" width="82" height="32" rx="8" fill="rgba(192,57,43,.72)"/>
+            <text x="227" y="88" text-anchor="middle" fill="white" font-size="14" font-family="DM Mono,monospace" font-weight="700">FVTPL</text>
+            <text x="49" y="120" text-anchor="middle" fill="rgba(255,255,255,.65)" font-size="12" font-family="DM Sans,sans-serif">Hold to collect</text>
+            <text x="131" y="120" text-anchor="middle" fill="rgba(255,255,255,.65)" font-size="12" font-family="DM Sans,sans-serif">Collect &amp; sell</text>
+            <text x="227" y="120" text-anchor="middle" fill="rgba(255,255,255,.58)" font-size="12" font-family="DM Sans,sans-serif">All others/FVO</text>
+            <text x="140" y="150" text-anchor="middle" fill="rgba(255,255,255,.4)" font-size="12" font-family="DM Mono,monospace">ECL impairment: Amort. Cost &amp; FVOCI debt</text>
+            <text x="140" y="165" text-anchor="middle" fill="rgba(255,255,255,.3)" font-size="11" font-family="DM Sans,sans-serif">3-stage expected credit loss model applies</text>
+          </svg>
+        </div>
+      </div>
+      <div>
+        <h4 style="font-family:'Playfair Display',serif;font-size:22px;color:var(--navy);margin-bottom:22px">US GAAP — CECL Model</h4>
+        <div style="background:var(--mist);border-radius:22px;padding:36px">
+          <p style="font-size:15px;color:var(--ink);line-height:1.8;margin-bottom:24px">The <strong>Current Expected Credit Loss</strong> model (ASC 326) requires <em>immediate recognition of lifetime expected losses</em> from Day 1 — regardless of whether a credit event has occurred.</p>
+          <svg width="100%" height="158" viewBox="0 0 300 158" xmlns="http://www.w3.org/2000/svg">
+            <text x="0" y="15" fill="var(--smoke)" font-size="12" font-family="DM Mono,monospace" font-weight="600">IFRS 9 — 3-STAGE ECL</text>
+            <rect x="0" y="22" width="84" height="34" rx="7" fill="rgba(26,107,74,.68)"/>
+            <text x="42" y="39" text-anchor="middle" fill="white" font-size="14" font-family="DM Mono,monospace" font-weight="700">Stage 1</text>
+            <text x="42" y="52" text-anchor="middle" fill="rgba(255,255,255,.82)" font-size="12" font-family="DM Sans,sans-serif">12-mo ECL</text>
+            <rect x="94" y="22" width="84" height="34" rx="7" fill="rgba(201,151,58,.72)"/>
+            <text x="136" y="39" text-anchor="middle" fill="white" font-size="14" font-family="DM Mono,monospace" font-weight="700">Stage 2</text>
+            <text x="136" y="52" text-anchor="middle" fill="rgba(255,255,255,.82)" font-size="12" font-family="DM Sans,sans-serif">Lifetime ECL</text>
+            <rect x="188" y="22" width="84" height="34" rx="7" fill="rgba(192,57,43,.78)"/>
+            <text x="230" y="39" text-anchor="middle" fill="white" font-size="14" font-family="DM Mono,monospace" font-weight="700">Stage 3</text>
+            <text x="230" y="52" text-anchor="middle" fill="rgba(255,255,255,.82)" font-size="12" font-family="DM Sans,sans-serif">Credit-impaired</text>
+            <text x="0" y="76" fill="var(--smoke)" font-size="12" font-family="DM Mono,monospace" font-weight="600">US GAAP — CECL (FROM DAY ONE)</text>
+            <rect x="0" y="82" width="272" height="38" rx="7" fill="rgba(192,57,43,.78)"/>
+            <text x="136" y="99" text-anchor="middle" fill="white" font-size="14" font-family="DM Mono,monospace" font-weight="700">Lifetime Expected Losses from Day 1</text>
+            <text x="136" y="113" text-anchor="middle" fill="rgba(255,255,255,.78)" font-size="13" font-family="DM Sans,sans-serif">"Effectively Stage 3 from origination"</text>
+            <line x1="0" y1="134" x2="272" y2="134" stroke="rgba(0,0,0,.1)" stroke-width="1.5"/>
+            <text x="136" y="151" text-anchor="middle" fill="var(--smoke)" font-size="13" font-family="DM Sans,sans-serif">Impact: higher provisions earlier → conservative earnings</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="callout reveal rd2" style="margin-top:36px">
+      <strong>Hedge Accounting:</strong> IFRS 9 allows a wider population of hedging instruments and hedged items than ASC 815. IFRS 9 also provides an option to <em>continue applying IAS 39</em> hedge accounting — a transitional accommodation with no US GAAP equivalent.
+    </div>
+  </div>
+</section>
+
+<!-- FLASHCARDS -->
+<section id="fcsec">
+  <div class="fchd">
+    <div>
+      <h2 class="fctit">Flashcard Study Deck</h2>
+      <p style="font-size:15px;color:rgba(255,255,255,.55);margin-top:8px">Click any card to reveal the answer · Use arrows to navigate</p>
+    </div>
+    <div class="fcctr" id="fcc">Card 1 of 10</div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 320px;gap:52px;align-items:start">
+    <div>
+      <div class="fcstage" onclick="flipCard()">
+        <div class="fccard" id="fcard">
+          <div class="fcface fcfront">
+            <div>
+              <div class="fctag" id="fctag">Inventory</div>
+              <p class="fcq" id="fcq">Under which standard is LIFO inventory accounting strictly prohibited?</p>
+            </div>
+            <div class="fchint">👆 Click card to reveal answer</div>
+          </div>
+          <div class="fcface fcback">
+            <div>
+              <div class="fctag">Answer</div>
+              <div class="fca" id="fca"><strong>IFRS (IAS 2)</strong>LIFO is strictly prohibited under IFRS. Only FIFO and Weighted Average Cost are permitted. US GAAP allows FIFO, LIFO, and Average Cost — subject to the LIFO conformity rule for tax purposes.</div>
+            </div>
+            <div style="font-size:13px;color:rgba(255,255,255,.5)">✓ Exam critical — frequently tested</div>
+          </div>
+        </div>
+      </div>
+      <div class="fcnav">
+        <button class="fcbtn" onclick="prevCard()">← Previous</button>
+        <button class="fcbtn" onclick="nextCard()">Next →</button>
+        <div class="fcprog" id="fcprog"></div>
+      </div>
+    </div>
+    <div style="background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.12);border-radius:22px;padding:26px">
+      <p style="font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:18px;font-weight:600">All Cards</p>
+      <div id="fclist" style="display:flex;flex-direction:column;gap:5px"></div>
+    </div>
+  </div>
+</section>
+
+<!-- QUIZ -->
+<section id="quizsec">
+  <h2 class="qh">Knowledge Assessment</h2>
+  <p class="qsub">Test your mastery — 8 technical questions covering all sections</p>
+  <div id="qwrap">
+    <div class="qcard" id="qcard">
+      <div class="qnum" id="qn">Question 1 of 8</div>
+      <div class="qtxt" id="qt">Loading...</div>
+      <div class="qopts" id="qo"></div>
+      <div class="qexp" id="qe"></div>
+      <div class="qnav">
+        <div class="qsc" id="qs">Score: 0 / 0</div>
+        <button class="qnxt" id="qnxt" onclick="nextQ()">Next Question →</button>
+      </div>
+    </div>
+    <div id="sscrn">
+      <div class="qcard" style="max-width:520px;margin:0 auto">
+        <div class="sring" id="sring"><span class="snum" id="sfn">0%</span></div>
+        <h3 style="font-family:'Playfair Display',serif;font-size:32px;color:var(--navy);margin-bottom:12px" id="stit">Quiz Complete!</h3>
+        <p style="font-size:16px;color:var(--smoke);margin-bottom:28px" id="smsg">Loading result...</p>
+        <button onclick="restartQ()" style="background:var(--navy);color:white;padding:15px 36px;border-radius:14px;border:none;cursor:pointer;font-size:15px;font-weight:700;font-family:'DM Sans',sans-serif">↺ Retake Quiz</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div>
+    <div class="brand">Seg<span>Way</span> Accountants Ltd</div>
+    <p class="fp">IFRS × US GAAP Master Study Kit — 2026 Edition</p>
+    <p class="fp2">For educational and CPD purposes. Always verify against current authoritative standards.</p>
+  </div>
+  <div class="flinks">
+    <a href="#p1">Cover</a><a href="#p2">Presentation</a><a href="#p3">Inventory</a>
+    <a href="#p4">Revenue</a><a href="#p5">Leases</a><a href="#p6">Taxes</a>
+    <a href="#p7">Instruments</a><a href="#fcsec">Flashcards</a>
+  </div>
+</footer>
+</main>
+
+<!-- AI PANEL -->
+
+    
+    <button class="aipx" onclick="toggleAI()">✕</button>
+  </div>
+  
+  </div>
+  
+</div>
+<button id="fab" onclick="toggleAI()"><i class="fa-solid fa-robot"></i></button>
+
+
+</body>
+</html>
