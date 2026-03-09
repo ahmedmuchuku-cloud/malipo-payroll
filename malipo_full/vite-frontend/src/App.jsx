@@ -214,8 +214,75 @@ function Toast({ msg, ok }) {
   );
 }
 
+function LandingPage({ onEnterAuth, onEnterCalc }) {
+  const [showFAQ, setShowFAQ] = useState(false);
+  return (
+    <div style={{ minHeight: "100vh", background: C.bg, color: C.text, fontFamily: "'Sora',sans-serif", overflowX: "hidden" }}>
+      {/* Hero Section */}
+      <div style={{ minHeight: "90vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "80px 40px", textAlign: "center", position: "relative" }}>
+        <div style={{ position: "absolute", top: -100, left: -100, width: 400, height: 400, background: C.greenG, borderRadius: "50%", filter: "blur(120px)", zIndex: 0 }} />
+        <div style={{ position: "absolute", bottom: -100, right: -100, width: 400, height: 400, background: `${C.blue}11`, borderRadius: "50%", filter: "blur(120px)", zIndex: 0 }} />
+
+        <div style={{ maxWidth: 900, zIndex: 1 }}>
+          <div style={{ width: 64, height: 64, background: `linear-gradient(135deg,${C.green},${C.greenD})`, borderRadius: 18, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32, margin: "0 auto 32px", boxShadow: `0 12px 32px ${C.green}33` }}>🇰🇪</div>
+          <h1 style={{ fontFamily: "'Fraunces',serif", fontSize: "clamp(2.5rem, 5vw, 4.5rem)", fontWeight: 800, lineHeight: 1.05, marginBottom: 24, letterSpacing: "-0.02em" }}>
+            Modern Payroll & Compliance <br /><span style={{ background: `linear-gradient(135deg,${C.green},${C.blue})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Simplified for Kenya.</span>
+          </h1>
+          <p style={{ color: C.muted, fontSize: "clamp(16px, 1.2vw, 20px)", lineHeight: 1.6, marginBottom: 48, maxWidth: 700, margin: "0 auto 48px" }}>
+            Automate PAYE, NSSF, SHIF, and Housing Levy. Generate iTax-ready CSVs and beautiful slips. Built for the modern Kenyan business.
+          </p>
+
+          <div style={{ display: "flex", gap: 20, justifyContent: "center", flexWrap: "wrap", marginBottom: 64 }}>
+            <button onClick={onEnterAuth} style={{ background: `linear-gradient(135deg,${C.green},${C.greenD})`, color: "#050e09", border: "none", padding: "18px 42px", borderRadius: 14, fontWeight: 800, fontSize: 17, cursor: "pointer", transition: "transform 0.2s, box-shadow 0.2s", boxShadow: `0 8px 24px ${C.green}44` }}>Launch Company Portal →</button>
+            <button onClick={onEnterCalc} style={{ background: C.surf, color: C.green, border: `1px solid ${C.green}44`, padding: "18px 42px", borderRadius: 14, fontWeight: 700, fontSize: 17, cursor: "pointer" }}>Try Statutory Calculator ◈</button>
+          </div>
+        </div>
+      </div>
+
+      {/* Features Grid */}
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 40px 100px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 32 }}>
+        {[
+          { t: "Bulletproof Compliance", d: "Automatically updated with 2025/26 KRA tax bands and SHIF 2.75% rates.", i: "⚖️" },
+          { t: "iTax & Statutory Exports", d: "One-click generation of KRA PAYE CSVs, NSSF templates, and SHIF schedules.", i: "📋" },
+          { t: "Role-Based Access", d: "Different views for HR, Accountants, and Employees with secure permissions.", i: "🔒" },
+          { t: "Employee Self-Service", d: "Staff can view their data and download PDF payslips without touching admin settings.", i: "👤" },
+          { t: "Bulk Excel Migration", d: "Migrate hundreds of employees from your existing spreadsheets in seconds.", i: "🚀" },
+          { t: "Privacy First", d: "All data stays in your browser (LocalStorage). No tracking, no sharing.", i: "🛡️" }
+        ].map(f => (
+          <div key={f.t} style={{ background: C.card, border: `1px solid ${C.border}`, padding: 32, borderRadius: 20, textAlign: "left" }}>
+            <div style={{ fontSize: 28, marginBottom: 16 }}>{f.i}</div>
+            <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12 }}>{f.t}</h3>
+            <p style={{ color: C.muted, fontSize: 14, lineHeight: 1.6 }}>{f.d}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* FAQ / Info */}
+      <div style={{ background: C.surf, padding: "80px 40px", textAlign: "center" }}>
+        <h2 style={{ fontFamily: "'Fraunces',serif", fontSize: 32, marginBottom: 40 }}>Common Questions</h2>
+        <div style={{ maxWidth: 700, margin: "0 auto", textAlign: "left" }}>
+          {[
+            { q: "Is this officially synchronized with KRA?", a: "We use the latest Finance Act 2023/24 tax bands. While we aim for 100% accuracy, we recommend verifying final uploads on the iTax portal." },
+            { q: "How much does it cost?", a: "Malipo is currently in public beta and free for Kenyan SMEs to help streamline local compliance." },
+            { q: "Where is my data stored?", a: "We use 'Local-First' storage. Your employee details never leave your device unless you manually sync them to your own secure cloud." }
+          ].map((item, idx) => (
+            <div key={idx} style={{ marginBottom: 24, borderBottom: `1px solid ${C.border}`, paddingBottom: 24 }}>
+              <h4 style={{ color: C.green, marginBottom: 8, fontWeight: 700 }}>{item.q}</h4>
+              <p style={{ color: C.muted, fontSize: 14 }}>{item.a}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <footer style={{ padding: 40, textAlign: "center", borderTop: `1px solid ${C.border}`, opacity: 0.5 }}>
+        <div style={{ fontSize: 12 }}>© 2026 Malipo Compliance · Made for Kenya 🇰🇪</div>
+      </footer>
+    </div>
+  );
+}
+
 // ─── AUTH SCREEN ─────────────────────────────────────────────────────────────
-function AuthScreen({ onAuth }) {
+function AuthScreen({ onAuth, onBack }) {
   const [mode, setMode] = useState("login"); // "login" | "register"
   const [form, setForm] = useState({ company: "", kraPin: "", nssfNo: "", shaNo: "", contactName: "", role: "accountant", email: "", password: "", confirmPassword: "" });
   const [err, setErr] = useState("");
@@ -1469,19 +1536,17 @@ const NAVS = [{ id: "dashboard", label: "Dashboard", icon: "◉" }, { id: "emplo
 
 export default function App() {
   const [loaded, setLoaded] = useState(false);
-  const [account, setAccount] = useState(null);
-  const [tab, setTab] = useState("dashboard");
+  const [view, setView] = useState("landing"); // "landing" | "auth" | "app" | "public-calc"
   const [employees, setEmployees] = useState(SEED_EMPLOYEES);
-  const [filings, setFilings] = useState(INIT_FILINGS);
-  const [settings, setSettings] = useState(INIT_SETTINGS);
-  const [staffUsers, setStaffUsers] = useState([]);
-  const [toast, setToast] = useState(null);
 
   // Load from storage on mount
   useEffect(() => {
     (async () => {
       const acct = await storageGet("malipo:account");
-      if (acct) setAccount(acct);
+      if (acct) {
+        setAccount(acct);
+        setView("app");
+      }
       const emps = await storageGet("malipo:employees");
       if (emps && emps.length > 0) setEmployees(emps);
       const sett = await storageGet("malipo:settings");
@@ -1501,10 +1566,16 @@ export default function App() {
 
   const handleAuth = useCallback((acct, isNew) => {
     setAccount(acct);
+    setView("app");
+    storageSet("malipo:account", acct);
     if (isNew) { setToast({ m: `Welcome, ${acct.contactName || acct.companyName}!`, ok: true }); setTimeout(() => setToast(null), 3500); }
   }, []);
 
-  const handleLogout = () => { setAccount(null); };
+  const handleLogout = () => {
+    setAccount(null);
+    setView("landing");
+    storageSet("malipo:account", null);
+  };
 
   if (!loaded) return (
     <div style={{ minHeight: "100vh", background: C.bg, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Sora',system-ui,sans-serif" }}>
@@ -1512,8 +1583,27 @@ export default function App() {
     </div>
   );
 
-  if (!account) return <AuthScreen onAuth={handleAuth} />;
-  if (account.isEmployee) return <EmployeePortal account={account} onLogout={handleLogout} />;
+  if (view === "landing") return <LandingPage onEnterAuth={() => setView("auth")} onEnterCalc={() => setView("public-calc")} />;
+  if (view === "public-calc") {
+    return (
+      <div style={{ minHeight: "100vh", background: C.bg, display: "flex", flexDirection: "column", alignItems: "center", padding: 40 }}>
+        <div style={{ maxWidth: 800, width: "100%" }}>
+          <button onClick={() => setView("landing")} style={{ background: "transparent", color: C.muted, border: "none", cursor: "pointer", marginBottom: 20 }}>← Back home</button>
+          <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 24, padding: 32 }}>
+            <h2 style={{ fontFamily: "'Fraunces',serif", fontSize: 24, marginBottom: 8 }}>Statutory Net Pay Calculator (Kenya)</h2>
+            <p style={{ color: C.muted, fontSize: 14, marginBottom: 32 }}>Calculate deductions based on latest Finance Act bands (PAYE, NSSF, SHIF, AHL).</p>
+            <Calculator baseGross={60000} fixedAdj={{}} />
+          </div>
+          <div style={{ textAlign: "center", marginTop: 40 }}>
+            <button onClick={() => setView("auth")} style={{ background: C.green, color: "#000", border: "none", padding: "14px 32px", borderRadius: 12, fontWeight: 800, cursor: "pointer" }}>Create Full Company Profile →</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (view === "auth") return <AuthScreen onAuth={handleAuth} onBack={() => setView("landing")} />;
+  if (account && account.isEmployee) return <EmployeePortal account={account} onLogout={handleLogout} />;
 
   const dl = getDaysLeft(), uc = dl.days <= 3 ? C.red : dl.days <= 7 ? C.gold : C.green;
   const pendingCount = Object.values(filings["Mar-25"] || {}).filter(v => v === "pending").length;

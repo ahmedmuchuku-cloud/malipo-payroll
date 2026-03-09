@@ -1,0 +1,21 @@
+name,jobTitle,department,employmentType,residency,startDate,kraPin,idNumber,nssfNo,shifNo,basicSalary,housingAllowance,transportAllowance,otherAllowances,helbDeduction,saccoDeduction,bankName,accountNo,bankBranch
+Alice Wangari,Associate,Sales,permanent,resident,2023-01-01,A11223344Z,12345678,NS123,SH123,50000,5000,5000,0,0,0,Equity,12345,Main
+Bob Onyango,Associate,Sales,permanent,resident,2023-01-01,A11223344Z,12345678,NS123,SH123,50000,5000,5000,0,0,0,Equity,12345,Main
+Charlie Mutua,Associate,Sales,permanent,resident,2023-01-01,A11223344Z,12345678,NS123,SH123,50000,5000,5000,0,0,0,Equity,12345,Main
+Doris Atieno,Associate,Sales,permanent,resident,2023-01-01,A11223344Z,12345678,NS123,SH123,50000,5000,5000,0,0,0,Equity,12345,Main
+Eugene Kiprop,Associate,Sales,permanent,resident,2023-01-01,A11223344Z,12345678,NS123,SH123,50000,5000,5000,0,0,0,Equity,12345,Main
+Faith Njeri,Associate,Sales,permanent,resident,2023-01-01,A11223344Z,12345678,NS123,SH123,50000,5000,5000,0,0,0,Equity,12345,Main
+Gilbert Maina,Associate,Sales,permanent,resident,2023-01-01,A11223344Z,12345678,NS123,SH123,50000,5000,5000,0,0,0,Equity,12345,Main
+Hellen Wambui,Associate,Sales,permanent,resident,2023-01-01,A11223344Z,12345678,NS123,SH123,50000,5000,5000,0,0,0,Equity,12345,Main
+Ian Kamau,Associate,Sales,permanent,resident,2023-01-01,A11223344Z,12345678,NS123,SH123,50000,5000,5000,0,0,0,Equity,12345,Main
+Jane Auma,Associate,Sales,permanent,resident,2023-01-01,A11223344Z,12345678,NS123,SH123,50000,5000,5000,0,0,0,Equity,12345,Main
+Kevin Omari,Associate,Sales,permanent,resident,2023-01-01,A11223344Z,12345678,NS123,SH123,50000,5000,5000,0,0,0,Equity,12345,Main
+Lucy Syombua,Associate,Sales,permanent,resident,2023-01-01,A11223344Z,12345678,NS123,SH123,50000,5000,5000,0,0,0,Equity,12345,Main
+Mark Chege,Associate,Sales,permanent,resident,2023-01-01,A11223344Z,12345678,NS123,SH123,50000,5000,5000,0,0,0,Equity,12345,Main
+Nancy Gakii,Associate,Sales,permanent,resident,2023-01-01,A11223344Z,12345678,NS123,SH123,50000,5000,5000,0,0,0,Equity,12345,Main
+Oscar Mwangi,Associate,Sales,permanent,resident,2023-01-01,A11223344Z,12345678,NS123,SH123,50000,5000,5000,0,0,0,Equity,12345,Main
+Phyllis Wavinya,Associate,Sales,permanent,resident,2023-01-01,A11223344Z,12345678,NS123,SH123,50000,5000,5000,0,0,0,Equity,12345,Main
+Quentin Koech,Associate,Sales,permanent,resident,2023-01-01,A11223344Z,12345678,NS123,SH123,50000,5000,5000,0,0,0,Equity,12345,Main
+Rosemary Nyambura,Associate,Sales,permanent,resident,2023-01-01,A11223344Z,12345678,NS123,SH123,50000,5000,5000,0,0,0,Equity,12345,Main
+Samuel Kipchirchir,Associate,Sales,permanent,resident,2023-01-01,A11223344Z,12345678,NS123,SH123,50000,5000,5000,0,0,0,Equity,12345,Main
+Teresa Wanja,Associate,Sales,permanent,resident,2023-01-01,A11223344Z,12345678,NS123,SH123,50000,5000,5000,0,0,0,Equity,12345,Main
