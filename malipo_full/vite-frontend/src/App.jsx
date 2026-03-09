@@ -1537,7 +1537,13 @@ const NAVS = [{ id: "dashboard", label: "Dashboard", icon: "◉" }, { id: "emplo
 export default function App() {
   const [loaded, setLoaded] = useState(false);
   const [view, setView] = useState("landing"); // "landing" | "auth" | "app" | "public-calc"
+  const [account, setAccount] = useState(null);
+  const [tab, setTab] = useState("dashboard");
   const [employees, setEmployees] = useState(SEED_EMPLOYEES);
+  const [filings, setFilings] = useState(INIT_FILINGS);
+  const [settings, setSettings] = useState(INIT_SETTINGS);
+  const [staffUsers, setStaffUsers] = useState([]);
+  const [toast, setToast] = useState(null);
 
   // Load from storage on mount
   useEffect(() => {
