@@ -1543,10 +1543,8 @@ export default function App() {
   useEffect(() => {
     (async () => {
       const acct = await storageGet("malipo:account");
-      if (acct) {
-        setAccount(acct);
-        setView("app");
-      }
+      if (acct) setAccount(acct);
+
       const emps = await storageGet("malipo:employees");
       if (emps && emps.length > 0) setEmployees(emps);
       const sett = await storageGet("malipo:settings");
@@ -1583,7 +1581,12 @@ export default function App() {
     </div>
   );
 
-  if (view === "landing") return <LandingPage onEnterAuth={() => setView("auth")} onEnterCalc={() => setView("public-calc")} />;
+  if (view === "landing") return (
+    <LandingPage
+      onEnterAuth={() => account ? setView("app") : setView("auth")}
+      onEnterCalc={() => setView("public-calc")}
+    />
+  );
   if (view === "public-calc") {
     return (
       <div style={{ minHeight: "100vh", background: C.bg, display: "flex", flexDirection: "column", alignItems: "center", padding: 40 }}>
