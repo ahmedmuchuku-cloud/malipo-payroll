@@ -12,6 +12,23 @@ function calcNSSF(g) {
 function calcSHIF(g) { return g * 0.0275; }
 function calcAHL(g) { return g * 0.015; }
 
+// WHT rates per Income Tax Act — Section 35
+const WHT_RATES = {
+  "professional": { resident: 0.05, nonresident: 0.20, label: "Professional / Consultancy" },
+  "management": { resident: 0.05, nonresident: 0.20, label: "Management / Technical Fees" },
+  "contractual": { resident: 0.03, nonresident: 0.20, label: "Contractual Fee (≥KES 24K/mo)" },
+  "commission": { resident: 0.10, nonresident: 0.20, label: "Commission / Agency" },
+  "other": { resident: 0.05, nonresident: 0.20, label: "Other Payment" },
+};
+
+function calcWHT(gross, whtType = "professional", residency = "resident") {
+  const rates = WHT_RATES[whtType] || WHT_RATES.professional;
+  const rate = residency === "nonresident" ? rates.nonresident : rates.resident;
+  return { wht: gross * rate, whtRate: rate, whtType };
+}
+
+function isContractor(e) { return e.employmentType === "contractor"; }
+
 const PAYE_BANDS = [
   { limit: 24000, rate: 0.10 },
   { limit: 32333, rate: 0.25 },
@@ -30,7 +47,25 @@ function calcPAYEBands(ti) {
   return { grossPAYE: gross, bands, personalRelief: PR, netPAYE: Math.max(0, gross - PR) };
 }
 
-function calcAll(g, adj = {}) {
+function calcAll(g, adj = {}, emp = null) {
+  // --- Contractor / WHT path ---
+  if (emp && isContractor(emp)) {
+    const whtInfo = calcWHT(g, emp.whtType || "professional", emp.residency || "resident");
+    const helb = adj.helbDeduction || 0, other = adj.otherDeductions || 0;
+    const totalDeductions = whtInfo.wht + helb + other;
+    return {
+      nssf: 0, shif: 0, ahl: 0, bik: 0, disabilityExempt: 0, pensionDed: 0,
+      taxableIncome: g, grossPAYE: 0, payeBands: [], personalRelief: 0,
+      insuranceRelief: 0, mortgageRelief: 0, postRetirementRelief: 0,
+      totalRelief: 0, paye: 0, helb, other,
+      totalStatutory: whtInfo.wht, totalDeductions, net: g - totalDeductions,
+      total: whtInfo.wht, nita: 0,
+      wht: whtInfo.wht, whtRate: whtInfo.whtRate, whtType: whtInfo.whtType,
+      isContractor: true, customDeductions: adj.customDeductions || []
+    };
+  }
+
+  // --- Standard employee path ---
   const nssf = calcNSSF(g), shif = calcSHIF(g), ahl = calcAHL(g);
   const bik = (adj.carBenefit || 0) + (adj.clubFees || 0) + (adj.loanFringe || 0);
   const disabilityExempt = Math.min(adj.disabilityExempt || 0, 150000);
@@ -51,7 +86,9 @@ function calcAll(g, adj = {}) {
     nssf, shif, ahl, bik, disabilityExempt, pensionDed, taxableIncome,
     grossPAYE, payeBands: bands, personalRelief, insuranceRelief, mortgageRelief,
     postRetirementRelief, totalRelief, paye, helb, other,
-    totalStatutory, totalDeductions, net, total: totalStatutory, nita, customDeductions: adj.customDeductions || []
+    totalStatutory, totalDeductions, net, total: totalStatutory, nita,
+    wht: 0, whtRate: 0, whtType: null, isContractor: false,
+    customDeductions: adj.customDeductions || []
   };
 }
 
@@ -79,8 +116,12 @@ function getTitle(e) { return e.jobTitle || e.role || ""; }
 
 function canWrite(account) {
   if (!account) return false;
-  if (account.isEmployee) return false;
-  return ["owner", "hr", "accountant", "finance"].includes(account.role?.toLowerCase());
+  if (account.isEmployee || account.viewMode === "employee") return false;
+  if (account.permissions && account.permissions.canWrite !== undefined) return account.permissions.canWrite;
+  const role = account.role?.toLowerCase();
+  if (role === "owner" || role === "admin") return true;
+  if (role === "accountant" || role === "finance" || role === "hr") return true;
+  return false;
 }
 
 function isHR(account) {
@@ -140,23 +181,23 @@ function buildMonthly(emps) {
   return MONTHS.map((m, i) => {
     const f = 0.92 + Math.sin(i * 0.7) * 0.06 + i * 0.003;
     const t = emps.reduce((a, e) => {
-      const g = Math.round(getGross(e) * f), d = calcAll(g, getAdj(e));
-      return { paye: a.paye + d.paye, nssf: a.nssf + d.nssf, shif: a.shif + d.shif, ahl: a.ahl + d.ahl };
-    }, { paye: 0, nssf: 0, shif: 0, ahl: 0 });
+      const g = Math.round(getGross(e) * f), d = calcAll(g, getAdj(e), e);
+      return { paye: a.paye + d.paye, nssf: a.nssf + d.nssf, shif: a.shif + d.shif, ahl: a.ahl + d.ahl, wht: a.wht + (d.wht || 0) };
+    }, { paye: 0, nssf: 0, shif: 0, ahl: 0, wht: 0 });
     return { month: m, ...t };
   });
 }
 
 const INIT_FILINGS = {
-  "Jul-24": { paye: "filed", nssf: "filed", shif: "filed", ahl: "filed" },
-  "Aug-24": { paye: "filed", nssf: "filed", shif: "filed", ahl: "filed" },
-  "Sep-24": { paye: "filed", nssf: "filed", shif: "filed", ahl: "filed" },
-  "Oct-24": { paye: "filed", nssf: "filed", shif: "filed", ahl: "filed" },
-  "Nov-24": { paye: "filed", nssf: "filed", shif: "late", ahl: "filed" },
-  "Dec-24": { paye: "filed", nssf: "filed", shif: "filed", ahl: "filed" },
-  "Jan-25": { paye: "filed", nssf: "filed", shif: "filed", ahl: "filed" },
-  "Feb-25": { paye: "filed", nssf: "filed", shif: "filed", ahl: "filed" },
-  "Mar-25": { paye: "pending", nssf: "pending", shif: "pending", ahl: "pending" },
+  "Jul-24": { paye: "filed", nssf: "filed", shif: "filed", ahl: "filed", wht: "filed" },
+  "Aug-24": { paye: "filed", nssf: "filed", shif: "filed", ahl: "filed", wht: "filed" },
+  "Sep-24": { paye: "filed", nssf: "filed", shif: "filed", ahl: "filed", wht: "filed" },
+  "Oct-24": { paye: "filed", nssf: "filed", shif: "filed", ahl: "filed", wht: "filed" },
+  "Nov-24": { paye: "filed", nssf: "filed", shif: "late", ahl: "filed", wht: "filed" },
+  "Dec-24": { paye: "filed", nssf: "filed", shif: "filed", ahl: "filed", wht: "filed" },
+  "Jan-25": { paye: "filed", nssf: "filed", shif: "filed", ahl: "filed", wht: "filed" },
+  "Feb-25": { paye: "filed", nssf: "filed", shif: "filed", ahl: "filed", wht: "filed" },
+  "Mar-25": { paye: "pending", nssf: "pending", shif: "pending", ahl: "pending", wht: "pending" },
 };
 
 const INIT_SETTINGS = {
@@ -165,9 +206,11 @@ const INIT_SETTINGS = {
   rem7: true, rem3: true, rem0: true, email_rem: false, year: "2024/25",
 };
 
+const API_BASE = "http://localhost:8000/api";
+
 const EMPTY_EMP = {
   name: "", jobTitle: "", department: "", employmentType: "permanent", startDate: "", residency: "resident",
-  kraPin: "", idNumber: "", nssfNo: "", shifNo: "",
+  kraPin: "", idNumber: "", nssfNo: "", shifNo: "", whtType: "professional",
   basicSalary: "", housingAllowance: "", transportAllowance: "", otherAllowances: "",
   carBenefit: "", clubFees: "", loanFringe: "",
   insuranceRelief: "", mortgageRelief: "", postRetirementRelief: "", disabilityExempt: "",
@@ -224,7 +267,9 @@ function LandingPage({ onEnterAuth, onEnterCalc }) {
         <div style={{ position: "absolute", bottom: -100, right: -100, width: 400, height: 400, background: `${C.blue}11`, borderRadius: "50%", filter: "blur(120px)", zIndex: 0 }} />
 
         <div style={{ maxWidth: 900, zIndex: 1 }}>
-          <div style={{ width: 64, height: 64, background: `linear-gradient(135deg,${C.green},${C.greenD})`, borderRadius: 18, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32, margin: "0 auto 32px", boxShadow: `0 12px 32px ${C.green}33` }}>🇰🇪</div>
+          <div style={{ width: 80, height: 80, background: `linear-gradient(135deg,#fff,#f8fafc)`, borderRadius: 22, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 32px", boxShadow: `0 12px 40px rgba(0,0,0,0.1)`, border: `1px solid ${C.border}`, overflow: "hidden" }}>
+            <img src="/logo.png" alt="Malipo Logo" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          </div>
           <h1 style={{ fontFamily: "'Fraunces',serif", fontSize: "clamp(2.5rem, 5vw, 4.5rem)", fontWeight: 800, lineHeight: 1.05, marginBottom: 24, letterSpacing: "-0.02em" }}>
             Modern Payroll & Compliance <br /><span style={{ background: `linear-gradient(135deg,${C.green},${C.blue})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Simplified for Kenya.</span>
           </h1>
@@ -243,8 +288,9 @@ function LandingPage({ onEnterAuth, onEnterCalc }) {
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 40px 100px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 32 }}>
         {[
           { t: "Bulletproof Compliance", d: "Automatically updated with 2025/26 KRA tax bands and SHIF 2.75% rates.", i: "⚖️" },
-          { t: "iTax & Statutory Exports", d: "One-click generation of KRA PAYE CSVs, NSSF templates, and SHIF schedules.", i: "📋" },
-          { t: "Role-Based Access", d: "Different views for HR, Accountants, and Employees with secure permissions.", i: "🔒" },
+          { t: "Withholding Tax (WHT)", d: "Full support for contractor payments with 3%, 5%, or 20% WHT auto-calculation.", i: "⚖️" },
+          { t: "iTax & Statutory Exports", d: "One-click generation of KRA PAYE/WHT CSVs, NSSF templates, and SHIF schedules.", i: "📋" },
+          { t: "Role-Based Access", d: "Granular permissions for Admins, Accountants, and Staff with 2FA protection.", i: "🔒" },
           { t: "Employee Self-Service", d: "Staff can view their data and download PDF payslips without touching admin settings.", i: "👤" },
           { t: "Bulk Excel Migration", d: "Migrate hundreds of employees from your existing spreadsheets in seconds.", i: "🚀" },
           { t: "Privacy First", d: "All data stays in your browser (LocalStorage). No tracking, no sharing.", i: "🛡️" }
@@ -283,22 +329,99 @@ function LandingPage({ onEnterAuth, onEnterCalc }) {
 
 // ─── AUTH SCREEN ─────────────────────────────────────────────────────────────
 function AuthScreen({ onAuth, onBack }) {
-  const [mode, setMode] = useState("login"); // "login" | "register"
-  const [form, setForm] = useState({ company: "", kraPin: "", nssfNo: "", shaNo: "", contactName: "", role: "accountant", email: "", password: "", confirmPassword: "" });
+  const [mode, setMode] = useState("login"); // "login" | "register" | "verify" | "roleChoice"
+  const [form, setForm] = useState({ company: "", kraPin: "", nssfNo: "", shaNo: "", contactName: "", role: "owner", email: "", password: "", confirmPassword: "", code: "" });
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
+  const [verificationPending, setVerificationPending] = useState(null);
+
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const handleImportCompany = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      const text = evt.target.result;
+      const rows = text.split("\n").filter(r => r.trim());
+      if (rows.length < 2) return setErr("Invalid CSV format.");
+      const headers = rows[0].split(",").map(h => h.trim());
+      const data = rows[1].split(",").map(d => d.trim().replace(/^"|"$/g, ""));
+      const mapping = {};
+      headers.forEach((h, i) => mapping[h] = data[i]);
+
+      setForm(f => ({
+        ...f,
+        company: mapping.companyName || mapping.company || f.company,
+        kraPin: mapping.kraPin || f.kraPin,
+        nssfNo: mapping.nssfNo || f.nssfNo,
+        shaNo: mapping.shifNo || mapping.shaNo || f.shaNo,
+        contactName: mapping.contactName || f.contactName,
+        email: mapping.contactEmail || mapping.email || f.email,
+        password: mapping.adminPin || mapping.password || f.password,
+        confirmPassword: mapping.adminPin || mapping.password || f.confirmPassword
+      }));
+      setErr("");
+    };
+    reader.readAsText(file);
+  };
 
   const handleRegister = async () => {
     if (!form.company || !form.email || !form.password) return setErr("Company name, email and password are required.");
     if (form.password !== form.confirmPassword) return setErr("Passwords do not match.");
     if (form.password.length < 6) return setErr("Password must be at least 6 characters.");
+
     setLoading(true);
-    const account = { companyName: form.company, kraPin: form.kraPin, nssfNo: form.nssfNo, shaNo: form.shaNo, contactName: form.contactName, role: form.role, email: form.email.toLowerCase(), password: form.password };
-    await storageSet("malipo:account", account);
-    await storageSet("malipo:settings", { company: form.company, pin: form.kraPin, nssf: form.nssfNo, sha: form.shaNo, paybill: "222222", email: form.email, rem7: true, rem3: true, rem0: true, email_rem: false, year: "2024/25" });
-    setLoading(false);
-    onAuth(account, true);
+    setErr("");
+    try {
+      const res = await fetch(`${API_BASE}/auth/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: form.email, company: form.company })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Registration failed");
+
+      setLoading(false);
+      setVerificationPending({ ...form, id: Date.now() });
+      setMode("verify");
+      // Note: Verification code is logged by backend for this demo
+    } catch (e) {
+      setLoading(false);
+      setErr(e.message);
+    }
+  };
+
+  const handleVerify = async () => {
+    if (!form.code) return setErr("Please enter the verification code.");
+
+    setLoading(true);
+    setErr("");
+    try {
+      const res = await fetch(`${API_BASE}/auth/verify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: verificationPending.email, code: form.code })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Verification failed");
+
+      const account = {
+        companyName: verificationPending.company,
+        kraPin: verificationPending.kraPin, nssfNo: verificationPending.nssfNo,
+        shaNo: verificationPending.shaNo, contactName: verificationPending.contactName,
+        role: verificationPending.role, email: verificationPending.email.toLowerCase(),
+        password: verificationPending.password, isVerified: true,
+        permissions: { canWrite: true, canExport: true, isAdmin: true }
+      };
+      await storageSet("malipo:account", account);
+      await storageSet("malipo:settings", { company: verificationPending.company, pin: verificationPending.kraPin, nssf: verificationPending.nssfNo, sha: verificationPending.shaNo, paybill: "222222", email: verificationPending.email, rem7: true, rem3: true, rem0: true, email_rem: false, year: "2024/25" });
+      setLoading(false);
+      onAuth(account, true);
+    } catch (e) {
+      setLoading(false);
+      setErr(e.message);
+    }
   };
 
   const handleLogin = async () => {
@@ -316,7 +439,19 @@ function AuthScreen({ onAuth, onBack }) {
     }
 
     if (!user) return setErr("Invalid email or password.");
-    onAuth(user, false);
+
+    // Check if the user has write capabilities to offer role choice
+    if (canWrite(user)) {
+      setVerificationPending(user);
+      setMode("roleChoice");
+    } else {
+      onAuth(user, false);
+    }
+  };
+
+  const selectRole = (v) => {
+    const u = { ...verificationPending, viewMode: v };
+    onAuth(u, false);
   };
 
   const handleEmployeeLogin = async () => {
@@ -346,8 +481,10 @@ function AuthScreen({ onAuth, onBack }) {
       <div style={{ width: "100%", maxWidth: 500 }}>
         {/* Logo */}
         <div style={{ textAlign: "center", marginBottom: 36 }}>
-          <div style={{ width: 56, height: 56, background: `linear-gradient(135deg,${C.green},${C.greenD})`, borderRadius: 16, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 28, boxShadow: `0 8px 28px ${C.greenG}`, marginBottom: 14 }}>🇰🇪</div>
-          <div style={{ color: C.text, fontSize: 28, fontWeight: 800, fontFamily: "'Fraunces',serif", lineHeight: 1 }}>Malipo</div>
+          <div style={{ width: 72, height: 72, background: "#fff", borderRadius: 20, display: "inline-flex", alignItems: "center", justifyContent: "center", boxShadow: `0 8px 32px rgba(0,0,0,0.1)`, border: `1px solid ${C.border}`, overflow: "hidden", marginBottom: 14 }}>
+            <img src="/logo.png" alt="Malipo" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          </div>
+          <div style={{ color: C.text, fontSize: 32, fontWeight: 800, fontFamily: "'Fraunces',serif", lineHeight: 1 }}>Malipo</div>
           <div style={{ color: C.muted, fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", marginTop: 4 }}>Kenya Payroll & Compliance Suite</div>
         </div>
 
@@ -381,8 +518,58 @@ function AuthScreen({ onAuth, onBack }) {
                 {loading ? "Signing in…" : "Access My Portal"}
               </button>
             </div>
+          ) : mode === "roleChoice" ? (
+            <div>
+              <div style={{ textAlign: "center", marginBottom: 24 }}>
+                <div style={{ fontSize: 32, marginBottom: 12 }}>🎭</div>
+                <h3 style={{ fontFamily: "'Fraunces',serif", fontSize: 20, marginBottom: 8 }}>Select Your Persona</h3>
+                <p style={{ color: C.muted, fontSize: 13, lineHeight: 1.5 }}>You have administrative privileges. How would you like to enter the portal today?</p>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                <button onClick={() => selectRole("admin")} style={{ display: "flex", alignItems: "center", gap: 16, width: "100%", background: C.surf, border: `1px solid ${C.green}44`, padding: 18, borderRadius: 14, cursor: "pointer", textAlign: "left", transition: "transform 0.2s" }} onMouseEnter={e => e.currentTarget.style.transform = "scale(1.02)"} onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}>
+                  <div style={{ fontSize: 28 }}>🛠️</div>
+                  <div>
+                    <div style={{ color: C.text, fontWeight: 700, fontSize: 14, marginBottom: 2 }}>Enter as Administrator</div>
+                    <div style={{ color: C.muted, fontSize: 11 }}>Full access to payroll, settings, and team management.</div>
+                  </div>
+                </button>
+                <button onClick={() => selectRole("employee")} style={{ display: "flex", alignItems: "center", gap: 16, width: "100%", background: C.surf, border: `1px solid ${C.border}`, padding: 18, borderRadius: 14, cursor: "pointer", textAlign: "left", transition: "transform 0.2s" }} onMouseEnter={e => e.currentTarget.style.transform = "scale(1.02)"} onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}>
+                  <div style={{ fontSize: 28 }}>👤</div>
+                  <div>
+                    <div style={{ color: C.text, fontWeight: 700, fontSize: 14, marginBottom: 2 }}>Enter as Employee</div>
+                    <div style={{ color: C.muted, fontSize: 11 }}>Only view my personal payslips and private profile.</div>
+                  </div>
+                </button>
+              </div>
+              <button onClick={() => setMode("login")} style={{ width: "100%", background: "none", color: C.muted, border: "none", marginTop: 24, fontSize: 13, cursor: "pointer", fontWeight: 600 }}>← Back to login</button>
+            </div>
+          ) : mode === "verify" ? (
+            <div>
+              <div style={{ textAlign: "center", marginBottom: 20 }}>
+                <div style={{ fontSize: 32, marginBottom: 12 }}>🛡️</div>
+                <h3 style={{ fontFamily: "'Fraunces',serif", fontSize: 20, marginBottom: 8 }}>Verify Your Identity</h3>
+                <p style={{ color: C.muted, fontSize: 13, lineHeight: 1.5 }}>We've sent a 4-digit code to <strong>{form.email || "your email"}</strong>. Enter it below to verify your administrator account.</p>
+              </div>
+              {inp("Verification Code", "code", "text", "0000")}
+              {err && <div style={{ color: C.red, fontSize: 12, marginBottom: 14, padding: "9px 12px", background: C.redG, borderRadius: 8, border: `1px solid ${C.red}33` }}>{err}</div>}
+              <button onClick={handleVerify} disabled={loading} style={{ width: "100%", background: `linear-gradient(135deg,${C.green},${C.greenD})`, color: "#000", border: "none", padding: 14, borderRadius: 12, fontWeight: 800, fontSize: 15, cursor: "pointer", marginTop: 4 }}>
+                {loading ? "Verifying..." : "Verify & Launch Portal"}
+              </button>
+              <div style={{ textAlign: "center", marginTop: 18, color: C.muted, fontSize: 12 }}>
+                Didn't receive it? <span onClick={() => { setErr("Code resent to " + form.email); setTimeout(() => setErr(""), 2000); }} style={{ color: C.green, cursor: "pointer", fontWeight: 600 }}>Resend code</span>
+              </div>
+            </div>
           ) : (
             <div>
+              <div style={{ background: `linear-gradient(135deg, ${C.surf}, ${C.bg})`, border: `1px dashed ${C.green}55`, borderRadius: 14, padding: 18, marginBottom: 24, textAlign: "center", position: "relative", overflow: "hidden" }}>
+                <div style={{ position: "absolute", top: -10, right: -10, fontSize: 40, opacity: 0.05 }}>📁</div>
+                <div style={{ color: C.text, fontWeight: 700, fontSize: 14, marginBottom: 4 }}>Fast-Track Setup? ✨</div>
+                <div style={{ color: C.muted, fontSize: 11, marginBottom: 14 }}>Import your company profile CSV to auto-fill these fields.</div>
+                <label style={{ display: "inline-flex", alignItems: "center", gap: 8, background: `linear-gradient(135deg, ${C.green}, ${C.greenD})`, color: "#000", padding: "10px 20px", borderRadius: 10, fontSize: 12, fontWeight: 800, cursor: "pointer", boxShadow: `0 4px 12px ${C.green}33` }}>
+                  <span>📁 Select Profile CSV</span>
+                  <input type="file" accept=".csv" onChange={handleImportCompany} style={{ display: "none" }} />
+                </label>
+              </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
                 <div style={{ gridColumn: "1/-1" }}>{inp("Company / Business Name *", "company", "text", "Savanna Tech Ltd")}</div>
                 {inp("KRA PIN", "kraPin", "text", "P051234567A")}
@@ -407,6 +594,9 @@ function AuthScreen({ onAuth, onBack }) {
               <button onClick={handleRegister} disabled={loading} style={{ width: "100%", background: `linear-gradient(135deg,${C.green},${C.greenD})`, color: "#000", border: "none", padding: 14, borderRadius: 12, fontWeight: 800, fontSize: 15, cursor: "pointer", marginTop: 4 }}>
                 {loading ? "Creating Account…" : "Create Account & Continue"}
               </button>
+              <div style={{ textAlign: "center", marginTop: 12 }}>
+                <button onClick={() => setMode("verify")} style={{ background: "none", border: "none", color: C.green, cursor: "pointer", fontSize: 13, padding: 8 }}>Got a code? Verify now</button>
+              </div>
             </div>
           )}
         </div>
@@ -430,7 +620,7 @@ function EmployeeModal({ emp, onSave, onClose }) {
 
   const gross = (Number(f.basicSalary) || 0) + (Number(f.housingAllowance) || 0) + (Number(f.transportAllowance) || 0) + (Number(f.otherAllowances) || 0);
   const cdTotal = (f.customDeductions || []).reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
-  const preview = gross > 0 ? calcAll(gross, { carBenefit: Number(f.carBenefit) || 0, clubFees: Number(f.clubFees) || 0, loanFringe: Number(f.loanFringe) || 0, insuranceRelief: Number(f.insuranceRelief) || 0, mortgageRelief: Number(f.mortgageRelief) || 0, postRetirementRelief: Number(f.postRetirementRelief) || 0, disabilityExempt: Number(f.disabilityExempt) || 0, pensionPreTax: Number(f.pensionPreTax) || 0, helbDeduction: Number(f.helbDeduction) || 0, otherDeductions: (Number(f.saccoDeduction) || 0) + (Number(f.salaryAdvance) || 0) + (Number(f.otherDeductions) || 0) + cdTotal, customDeductions: f.customDeductions || [] }) : null;
+  const preview = gross > 0 ? calcAll(gross, { carBenefit: Number(f.carBenefit) || 0, clubFees: Number(f.clubFees) || 0, loanFringe: Number(f.loanFringe) || 0, insuranceRelief: Number(f.insuranceRelief) || 0, mortgageRelief: Number(f.mortgageRelief) || 0, postRetirementRelief: Number(f.postRetirementRelief) || 0, disabilityExempt: Number(f.disabilityExempt) || 0, pensionPreTax: Number(f.pensionPreTax) || 0, helbDeduction: Number(f.helbDeduction) || 0, otherDeductions: (Number(f.saccoDeduction) || 0) + (Number(f.salaryAdvance) || 0) + (Number(f.otherDeductions) || 0) + cdTotal, customDeductions: f.customDeductions || [] }, f) : null;
 
   const handleSave = () => {
     if (!f.name) return;
@@ -482,7 +672,8 @@ function EmployeeModal({ emp, onSave, onClose }) {
         <div style={{ gridColumn: "1/-1" }}><Field label="Full Name" k="name" required placeholder="e.g. Amina Wanjiru" /></div>
         <Field label="Job Title" k="jobTitle" placeholder="e.g. Sales Manager" />
         <Field label="Department" k="department" placeholder="e.g. Finance" />
-        <Select label="Employment Type" k="employmentType" opts={[["permanent", "Permanent"], ["contract", "Contract"], ["casual", "Casual / Part-Time"], ["director", "Director"]]} />
+        <Select label="Employment Type" k="employmentType" opts={[["permanent", "Permanent"], ["contract", "Contract"], ["casual", "Casual / Part-Time"], ["director", "Director"], ["contractor", "Contractor (WHT)"]]} />
+        {f.employmentType === "contractor" && <Select label="WHT Category" k="whtType" opts={Object.entries(WHT_RATES).map(([k, v]) => [k, v.label])} />}
         <Select label="Tax Residency" k="residency" opts={[["resident", "Resident"], ["nonresident", "Non-Resident"]]} />
         <Field label="Start Date" k="startDate" type="date" />
         <Field label="KRA PIN" k="kraPin" placeholder="A012345678B" hint="Format: A000000000B" />
@@ -955,11 +1146,14 @@ function Calculator({ baseGross, fixedAdj }) {
   const [months, setMonths] = useState(1);
   const [tab, setTab] = useState("standard");
   const [adj, setAdj] = useState(fixedAdj || { insuranceRelief: 0, mortgageRelief: 0, postRetirementRelief: 0, disabilityExempt: 0, carBenefit: 0, clubFees: 0, loanFringe: 0, helbDeduction: 0, otherDeductions: 0, pensionPreTax: 0 });
+  const [incomeType, setIncomeType] = useState("salary");
+  const [whtCat, setWhtCat] = useState("professional");
 
   // If fixedAdj is provided, we merge current UI state with the fixed values
   const effectiveAdj = fixedAdj ? { ...adj, ...fixedAdj } : adj;
   const setA = (k, v) => setAdj(a => ({ ...a, [k]: v }));
-  const d = calcAll(gross, effectiveAdj);
+  const empMock = incomeType === "contractor" ? { employmentType: "contractor", whtType: whtCat, residency: "resident" } : null;
+  const d = calcAll(gross, effectiveAdj, empMock);
   const Row = ({ label, val, color, bold, indent }) => (
     <div style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", borderBottom: `1px solid ${C.border}33` }}>
       <span style={{ color: C.muted, fontSize: indent ? 11 : 13, paddingLeft: indent ? 14 : 0 }}>{label}</span>
@@ -976,9 +1170,22 @@ function Calculator({ baseGross, fixedAdj }) {
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 22 }}>
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: 24 }}>
-          <SecTitle>Gross Monthly Salary</SecTitle>
+          <div style={{ display: "flex", background: C.surf, borderRadius: 10, padding: 4, marginBottom: 18 }}>
+            {[["salary", "Monthly Salary"], ["contractor", "Contractor (WHT)"]].map(([v, l]) => (
+              <button key={v} onClick={() => setIncomeType(v)} style={{ flex: 1, padding: "8px", borderRadius: 8, border: "none", background: incomeType === v ? C.greenD : "transparent", color: incomeType === v ? "#000" : C.muted, fontWeight: incomeType === v ? 700 : 500, fontSize: 12, cursor: "pointer" }}>{l}</button>
+            ))}
+          </div>
+          <SecTitle>{incomeType === "salary" ? "Gross Monthly Salary" : "Contract Amount (Gross)"}</SecTitle>
           <input type="number" value={gross} onChange={e => setGross(Number(e.target.value) || 0)}
             style={{ width: "100%", background: C.surf, border: `1px solid ${C.borderB}`, borderRadius: 10, padding: "14px 16px", color: C.green, fontSize: 30, fontWeight: 800, outline: "none", boxSizing: "border-box", fontFamily: "'Fraunces',serif" }} />
+          {incomeType === "contractor" && (
+            <div style={{ marginTop: 16 }}>
+              <label style={{ color: C.muted, fontSize: 10, letterSpacing: "0.07em", textTransform: "uppercase", display: "block", marginBottom: 8 }}>WHT Category</label>
+              <select value={whtCat} onChange={e => setWhtCat(e.target.value)} style={{ width: "100%", background: C.surf, border: `1px solid ${C.border}`, borderRadius: 8, padding: "10px", color: C.text, fontSize: 13, outline: "none" }}>
+                {Object.entries(WHT_RATES).map(([k, v]) => <option key={k} value={k}>{v.label} ({(v.resident * 100).toFixed(0)}%)</option>)}
+              </select>
+            </div>
+          )}
           <input type="range" min={10000} max={500000} step={1000} value={gross} onChange={e => setGross(Number(e.target.value))} style={{ width: "100%", marginTop: 12 }} />
           <div style={{ display: "flex", justifyContent: "space-between", color: C.dim, fontSize: 11, marginTop: 4 }}><span>KES 10,000</span><span>KES 500,000</span></div>
           <div style={{ marginTop: 16 }}>
@@ -1026,27 +1233,37 @@ function Calculator({ baseGross, fixedAdj }) {
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <div style={{ background: `linear-gradient(160deg,${C.card},#091a0f)`, border: `1px solid ${C.greenD}55`, borderRadius: 14, padding: 24 }}>
           <SecTitle>Full Pay Slip {months > 1 ? `— ${months}-Month Projection` : ""}</SecTitle>
-          <Row label="Gross Salary" val={fmt(gross * months)} color={C.text} bold />
+          <Row label={d.isContractor ? "Contract Amount" : "Gross Salary"} val={fmt(gross * months)} color={C.text} bold />
           <div style={{ margin: "4px 0", paddingTop: 2 }}>
-            <div style={{ color: C.muted, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 4 }}>Statutory Deductible</div>
-            <Row label="NSSF — Phase 4 (6%, max 6,480)" val={`(${fmt(d.nssf * months)})`} color={C.blue} indent />
-            <Row label="SHIF — SHA (2.75%)" val={`(${fmt(d.shif * months)})`} color={C.gold} indent />
-            <Row label="AHL — Housing Levy (1.5%)" val={`(${fmt(d.ahl * months)})`} color={C.purple} indent />
-            {d.pensionDed > 0 && <Row label="Pension Pre-Tax" val={`(${fmt(d.pensionDed * months)})`} color={C.blue} indent />}
-            {d.disabilityExempt > 0 && <Row label="Disability Exemption" val={`(${fmt(d.disabilityExempt * months)})`} color={C.green} indent />}
-            {d.bik > 0 && <Row label="Benefits-in-Kind (added)" val={`+${fmt(d.bik * months)}`} color={C.gold} indent />}
+            <div style={{ color: C.muted, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 4 }}>{d.isContractor ? "Withholding Tax" : "Statutory Deductible"}</div>
+            {d.isContractor ? (
+              <Row label={`${d.whtType} WHT (${(d.whtRate * 100).toFixed(1)}%)`} val={`(${fmt(d.wht * months)})`} color={C.red} bold />
+            ) : (
+              <>
+                <Row label="NSSF — Phase 4 (6%, max 6,480)" val={`(${fmt(d.nssf * months)})`} color={C.blue} indent />
+                <Row label="SHIF — SHA (2.75%)" val={`(${fmt(d.shif * months)})`} color={C.gold} indent />
+                <Row label="AHL — Housing Levy (1.5%)" val={`(${fmt(d.ahl * months)})`} color={C.purple} indent />
+                {d.pensionDed > 0 && <Row label="Pension Pre-Tax" val={`(${fmt(d.pensionDed * months)})`} color={C.blue} indent />}
+                {d.disabilityExempt > 0 && <Row label="Disability Exemption" val={`(${fmt(d.disabilityExempt * months)})`} color={C.green} indent />}
+                {d.bik > 0 && <Row label="Benefits-in-Kind (added)" val={`+${fmt(d.bik * months)}`} color={C.gold} indent />}
+              </>
+            )}
           </div>
-          <Divider label="= Taxable Income" val={fmt(d.taxableIncome * months)} />
-          <div style={{ margin: "4px 0", paddingTop: 2 }}>
-            <div style={{ color: C.muted, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 4, marginTop: 6 }}>PAYE Bands</div>
-            {d.payeBands.map((b, i) => <Row key={i} label={`Band ${i + 1} @ ${(b.rate * 100).toFixed(1)}%`} val={fmt(b.tax * months)} color={C.muted} indent />)}
-            <Row label="Gross PAYE" val={fmt(d.grossPAYE * months)} color={C.red} bold />
-            <Row label="Less: Personal Relief" val={`(${fmt(d.personalRelief * months)})`} color={C.green} indent />
-            {d.insuranceRelief > 0 && <Row label="Less: Insurance Relief" val={`(${fmt(d.insuranceRelief * months)})`} color={C.green} indent />}
-            {d.mortgageRelief > 0 && <Row label="Less: Mortgage Relief" val={`(${fmt(d.mortgageRelief * months)})`} color={C.green} indent />}
-            {d.postRetirementRelief > 0 && <Row label="Less: Post-Retirement" val={`(${fmt(d.postRetirementRelief * months)})`} color={C.green} indent />}
-          </div>
-          <Divider label="= PAYE Payable" val={`(${fmt(d.paye * months)})`} />
+          {!d.isContractor && (
+            <>
+              <Divider label="= Taxable Income" val={fmt(d.taxableIncome * months)} />
+              <div style={{ margin: "4px 0", paddingTop: 2 }}>
+                <div style={{ color: C.muted, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 4, marginTop: 6 }}>PAYE Bands</div>
+                {d.payeBands.map((b, i) => <Row key={i} label={`Band ${i + 1} @ ${(b.rate * 100).toFixed(1)}%`} val={fmt(b.tax * months)} color={C.muted} indent />)}
+                <Row label="Gross PAYE" val={fmt(d.grossPAYE * months)} color={C.red} bold />
+                <Row label="Less: Personal Relief" val={`(${fmt(d.personalRelief * months)})`} color={C.green} indent />
+                {d.insuranceRelief > 0 && <Row label="Less: Insurance Relief" val={`(${fmt(d.insuranceRelief * months)})`} color={C.green} indent />}
+                {d.mortgageRelief > 0 && <Row label="Less: Mortgage Relief" val={`(${fmt(d.mortgageRelief * months)})`} color={C.green} indent />}
+                {d.postRetirementRelief > 0 && <Row label="Less: Post-Retirement" val={`(${fmt(d.postRetirementRelief * months)})`} color={C.green} indent />}
+              </div>
+              <Divider label="= PAYE Payable" val={`(${fmt(d.paye * months)})`} />
+            </>
+          )}
           {(d.helb > 0 || d.other > 0) && (
             <div style={{ marginTop: 4 }}>
               {d.helb > 0 && <Row label="HELB Deduction" val={`(${fmt(d.helb * months)})`} color={C.red} indent />}
@@ -1054,25 +1271,29 @@ function Calculator({ baseGross, fixedAdj }) {
             </div>
           )}
           <div style={{ display: "flex", justifyContent: "space-between", padding: "16px 0 0", marginTop: 6, borderTop: `2px solid ${C.borderB}` }}>
-            <span style={{ color: C.text, fontWeight: 800, fontSize: 16, fontFamily: "'Fraunces',serif" }}>Take-Home Pay</span>
+            <span style={{ color: C.text, fontWeight: 800, fontSize: 16, fontFamily: "'Fraunces',serif" }}>{d.isContractor ? "Net Payment" : "Take-Home Pay"}</span>
             <span style={{ color: C.green, fontSize: 28, fontWeight: 800, fontFamily: "'Fraunces',serif" }}>{fmt(d.net * months)}</span>
           </div>
         </div>
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: 22 }}>
-          <SecTitle style={{ fontSize: 14 }}>Effective Rates</SecTitle>
-          {[["Gross PAYE Rate", gross > 0 ? ((d.grossPAYE / gross) * 100).toFixed(2) : "0.00", C.red], ["Net PAYE Rate", gross > 0 ? ((d.paye / gross) * 100).toFixed(2) : "0.00", C.gold], ["Total Statutory Rate", gross > 0 ? ((d.totalStatutory / gross) * 100).toFixed(2) : "0.00", C.purple], ["Net Pay Retention", gross > 0 ? ((d.net / gross) * 100).toFixed(2) : "100.00", C.green]].map(([l, v, c]) => (
-            <div key={l} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: `1px solid ${C.border}33` }}>
-              <span style={{ color: C.muted, fontSize: 12 }}>{l}</span>
-              <span style={{ color: c, fontWeight: 700, fontSize: 15 }}>{v}%</span>
-            </div>
-          ))}
-        </div>
-        <div style={{ background: C.redG, border: `1px solid ${C.red}44`, borderRadius: 12, padding: 16 }}>
-          <div style={{ color: C.red, fontWeight: 700, fontSize: 13, marginBottom: 6 }}>⚠ 2026 Enforcement Notice</div>
+        {!d.isContractor && (
+          <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: 22 }}>
+            <SecTitle style={{ fontSize: 14 }}>Effective Rates</SecTitle>
+            {[["Gross PAYE Rate", gross > 0 ? ((d.grossPAYE / gross) * 100).toFixed(2) : "0.00", C.red], ["Net PAYE Rate", gross > 0 ? ((d.paye / gross) * 100).toFixed(2) : "0.00", C.gold], ["Total Statutory Rate", gross > 0 ? ((d.totalStatutory / gross) * 100).toFixed(2) : "0.00", C.purple], ["Net Pay Retention", gross > 0 ? ((d.net / gross) * 100).toFixed(2) : "100.00", C.green]].map(([l, v, c]) => (
+              <div key={l} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: `1px solid ${C.border}33` }}>
+                <span style={{ color: C.muted, fontSize: 12 }}>{l}</span>
+                <span style={{ color: c, fontWeight: 700, fontSize: 15 }}>{v}%</span>
+              </div>
+            ))}
+          </div>
+        )}
+        <div style={{ background: d.isContractor ? `${C.blue}22` : C.redG, border: `1px solid ${d.isContractor ? C.blue : C.red}44`, borderRadius: 12, padding: 16 }}>
+          <div style={{ color: d.isContractor ? C.blue : C.red, fontWeight: 700, fontSize: 13, marginBottom: 6 }}>{d.isContractor ? "ℹ WHT Compliance" : "⚠ 2026 Enforcement Notice"}</div>
           <div style={{ color: C.muted, fontSize: 11, lineHeight: 1.7 }}>
-            KRA auto-validates returns against eTIMS data from Jan 2026.<br />
-            Late PAYE: 5% of tax + 1%/mo · SHIF: 2%/mo · AHL: 3%/mo.<br />
-            Deadline: 9th of following month.
+            {d.isContractor ? (
+              <>WHT must be remitted by the 20th of the following month.<br />Certificates are issued via iTax upon successful payment.<br />Rates: Professional (5%), Contractual (3%).</>
+            ) : (
+              <>KRA auto-validates returns against eTIMS data from Jan 2026.<br />Late PAYE: 5% of tax + 1%/mo · SHIF: 2%/mo · AHL: 3%/mo.<br />Deadline: 9th of following month.</>
+            )}
           </div>
         </div>
       </div>
@@ -1086,7 +1307,10 @@ function Filings({ employees, filings, setFilings, settings, account }) {
   const [confirm, setConfirm] = useState(null);
   const adminMode = canWrite(account);
   const showToast = (m, ok = true) => { setToast({ m, ok }); setTimeout(() => setToast(null), 3000); };
-  const totals = employees.reduce((a, e) => { const g = getGross(e), d = calcAll(g, getAdj(e)); return { paye: a.paye + d.paye, nssf: a.nssf + d.nssf, shif: a.shif + d.shif, ahl: a.ahl + d.ahl }; }, { paye: 0, nssf: 0, shif: 0, ahl: 0 });
+  const totals = employees.reduce((a, e) => {
+    const g = getGross(e), d = calcAll(g, getAdj(e), e);
+    return { paye: a.paye + d.paye, nssf: a.nssf + d.nssf, shif: a.shif + d.shif, ahl: a.ahl + d.ahl, wht: a.wht + (d.wht || 0), helb: a.helb + (d.helb || 0), nita: a.nita + (d.nita || 0) };
+  }, { paye: 0, nssf: 0, shif: 0, ahl: 0, wht: 0, helb: 0, nita: 0 });
   const handleDownload = async (portalCode) => {
     showToast("Generating Excel file...");
     try {
@@ -1136,7 +1360,7 @@ function Filings({ employees, filings, setFilings, settings, account }) {
           sha_no: settings.sha || ""
         }
       };
-      const res = await fetch("http://localhost:8000/api/generate/" + portalCode, {
+      const res = await fetch(`${API_BASE}/generate/${portalCode}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(req)
@@ -1160,6 +1384,9 @@ function Filings({ employees, filings, setFilings, settings, account }) {
     { code: "nssf", name: "NSSF (Phase 4)", portal: "NSSF Portal", color: C.blue, amount: totals.nssf * 2, paybill: "200777", icon: "🛡", account: "NSSF Employer No." },
     { code: "shif", name: "SHIF (SHA)", portal: "SHA Portal", color: C.gold, amount: totals.shif, paybill: "363636", icon: "🏥", account: "SHA Employer No." },
     { code: "ahl", name: "Affordable Housing Levy", portal: "KRA iTax", color: C.purple, amount: totals.ahl * 2, paybill: "222222", icon: "🏠", account: "Company PIN" },
+    { code: "helb", name: "HELB Loan Repayment", portal: "HELB Portal", color: C.red, amount: totals.helb, paybill: "200888", icon: "🎓", account: "Company PIN" },
+    { code: "nita", name: "NITA Industrial Training", portal: "NITA Portal", color: C.blue, amount: totals.nita, paybill: "222222", icon: "🏗", account: "NITA Employer No." },
+    { code: "wht", name: "Withholding Tax (WHT)", portal: "KRA iTax", color: C.blue, amount: totals.wht, paybill: "222222", icon: "⚖️", account: "Company PIN" },
   ];
   const periods = Object.keys(filings).reverse();
   const currentPeriod = periods[0];
@@ -1193,13 +1420,13 @@ function Filings({ employees, filings, setFilings, settings, account }) {
       <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: 22 }}>
         <SecTitle>Filing History</SecTitle>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead><tr>{["Period", "PAYE", "NSSF", "SHIF", "AHL", "Overall"].map(h => (
+          <thead><tr>{["Period", "PAYE", "NSSF", "SHIF", "AHL", "HELB", "NITA", "WHT", "Overall"].map(h => (
             <th key={h} style={{ color: C.muted, fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "left", padding: "0 12px 12px", borderBottom: `1px solid ${C.border}` }}>{h}</th>
           ))}</tr></thead>
           <tbody>
             {periods.map(p => {
               const fs = filings[p] || {};
-              const vals = ["paye", "nssf", "shif", "ahl"].map(k => fs[k] || "pending");
+              const vals = ["paye", "nssf", "shif", "ahl", "helb", "nita", "wht"].map(k => fs[k] || "pending");
               const overall = vals.every(v => v === "filed") ? "filed" : vals.some(v => v === "late") ? "late" : "pending";
               return (
                 <tr key={p} style={{ borderBottom: `1px solid ${C.border}22` }}>
@@ -1233,9 +1460,13 @@ function Filings({ employees, filings, setFilings, settings, account }) {
 function Reports({ employees }) {
   const [report, setReport] = useState(null);
   const totalGross = employees.reduce((s, e) => s + getGross(e), 0);
-  const tots = employees.reduce((a, e) => { const g = getGross(e), d = calcAll(g, getAdj(e)); return { paye: a.paye + d.paye, nssf: a.nssf + d.nssf, shif: a.shif + d.shif, ahl: a.ahl + d.ahl, net: a.net + d.net }; }, { paye: 0, nssf: 0, shif: 0, ahl: 0, net: 0 });
+  const tots = employees.reduce((a, e) => {
+    const g = getGross(e), d = calcAll(g, getAdj(e), e);
+    return { paye: a.paye + d.paye, nssf: a.nssf + d.nssf, shif: a.shif + d.shif, ahl: a.ahl + d.ahl, wht: a.wht + (d.wht || 0), helb: a.helb + (d.helb || 0), nita: a.nita + (d.nita || 0), net: a.net + d.net };
+  }, { paye: 0, nssf: 0, shif: 0, ahl: 0, wht: 0, helb: 0, nita: 0, net: 0 });
   const reports = [
     { id: "paye", icon: "📋", title: "KRA PAYE Return", desc: "iTax-ready CSV with KRA PIN, gross, PAYE per employee" },
+    { id: "wht", icon: "⚖️", title: "KRA WHT Return", desc: "iTax-ready CSV for Withholding Tax on contractor payments" },
     { id: "nssf", icon: "🛡", title: "NSSF Contribution Schedule", desc: "Employee & employer contributions per member no." },
     { id: "payregister", icon: "📊", title: "Payroll Register", desc: "Full gross-to-net breakdown for all employees" },
     { id: "p9a", icon: "📄", title: "P9A Annual Summary", desc: "KRA P9A form data for annual income tax filing" },
@@ -1244,13 +1475,16 @@ function Reports({ employees }) {
     let rows = [], head = "";
     if (id === "paye") {
       head = "KRA_PIN,Employee_Name,Gross_Pay,Taxable_Income,Gross_PAYE,Personal_Relief,Net_PAYE\n";
-      rows = employees.map(e => { const g = getGross(e), d = calcAll(g, getAdj(e)); return `${e.kraPin || "N/A"},${e.name},${g.toFixed(2)},${d.taxableIncome.toFixed(2)},${d.grossPAYE.toFixed(2)},${d.personalRelief.toFixed(2)},${d.paye.toFixed(2)}`; });
+      rows = employees.filter(e => !isContractor(e)).map(e => { const g = getGross(e), d = calcAll(g, getAdj(e), e); return `${e.kraPin || "N/A"},${e.name},${g.toFixed(2)},${d.taxableIncome.toFixed(2)},${d.grossPAYE.toFixed(2)},${d.personalRelief.toFixed(2)},${d.paye.toFixed(2)}`; });
+    } else if (id === "wht") {
+      head = "KRA_PIN,Contractor_Name,Payment_Type,Gross_Amount,WHT_Rate,WHT_Amount,Net_Amount\n";
+      rows = employees.filter(e => isContractor(e)).map(e => { const g = getGross(e), d = calcAll(g, getAdj(e), e); return `${e.kraPin || "N/A"},${e.name},${d.whtType},${g.toFixed(2)},${(d.whtRate * 100).toFixed(1)}%,${d.wht.toFixed(2)},${d.net.toFixed(2)}`; });
     } else if (id === "nssf") {
       head = "NSSF_No,Employee_Name,Gross,Employee_Contribution,Employer_Contribution,Total\n";
       rows = employees.map(e => { const g = getGross(e), n = calcNSSF(g); return `${e.nssfNo || "N/A"},${e.name},${g.toFixed(2)},${n.toFixed(2)},${n.toFixed(2)},${(n * 2).toFixed(2)}`; });
     } else if (id === "payregister") {
-      head = "Employee,KRA_PIN,Department,Gross,NSSF,SHIF,AHL,PAYE,Total_Deductions,Net_Pay\n";
-      rows = employees.map(e => { const g = getGross(e), d = calcAll(g, getAdj(e)); return `${e.name},${e.kraPin || "N/A"},${e.department || ""},${g.toFixed(2)},${d.nssf.toFixed(2)},${d.shif.toFixed(2)},${d.ahl.toFixed(2)},${d.paye.toFixed(2)},${d.totalDeductions.toFixed(2)},${d.net.toFixed(2)}`; });
+      head = "Employee,KRA_PIN,Department,Gross,NSSF,SHIF,AHL,PAYE,HELB,NITA,Total_Deductions,Net_Pay\n";
+      rows = employees.map(e => { const g = getGross(e), d = calcAll(g, getAdj(e), e); return `${e.name},${e.kraPin || "N/A"},${e.department || ""},${g.toFixed(2)},${d.nssf.toFixed(2)},${d.shif.toFixed(2)},${d.ahl.toFixed(2)},${d.paye.toFixed(2)},${(d.helb || 0).toFixed(2)},${(d.nita || 0).toFixed(2)},${d.totalDeductions.toFixed(2)},${d.net.toFixed(2)}`; });
     } else {
       head = "Employee,KRA_PIN,Annual_Gross,Annual_PAYE,Annual_NSSF,Annual_SHIF,Annual_AHL,Annual_Net\n";
       rows = employees.map(e => { const g = getGross(e), d = calcAll(g, getAdj(e)); return `${e.name},${e.kraPin || "N/A"},${(g * 12).toFixed(2)},${(d.paye * 12).toFixed(2)},${(d.nssf * 12).toFixed(2)},${(d.shif * 12).toFixed(2)},${(d.ahl * 12).toFixed(2)},${(d.net * 12).toFixed(2)}`; });
@@ -1259,8 +1493,8 @@ function Reports({ employees }) {
   };
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}>
-        {[["Total Payroll", fmt(totalGross), "💼", C.green], ["PAYE Payable", fmt(tots.paye), "📋", C.blue], ["SHIF + NSSF", fmt(tots.shif + tots.nssf * 2), "🏥", C.gold], ["Net Pay", fmt(tots.net), "✅", C.green]].map(([l, v, i, c]) => (
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 12 }}>
+        {[["Total Payroll", fmt(totalGross), "💼", C.green], ["PAYE Due", fmt(tots.paye), "📋", C.blue], ["Social/Housing", fmt(tots.shif + tots.nssf * 2 + tots.ahl * 2), "🏥", C.gold], ["HELB/NITA", fmt(tots.helb + tots.nita), "🎓", C.purple], ["Net Pay", fmt(tots.net), "✅", C.green]].map(([l, v, i, c]) => (
           <div key={l} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 18 }}>
             <div style={{ fontSize: 20, marginBottom: 6 }}>{i}</div>
             <div style={{ color: C.muted, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em" }}>{l}</div>
@@ -1635,9 +1869,11 @@ export default function App() {
       {/* SIDEBAR */}
       <div style={{ width: 220, background: C.surf, borderRight: `1px solid ${C.border}`, display: "flex", flexDirection: "column", flexShrink: 0 }}>
         <div style={{ padding: "26px 22px 22px", borderBottom: `1px solid ${C.border}` }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ width: 38, height: 38, background: `linear-gradient(135deg,${C.green},${C.greenD})`, borderRadius: 11, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, boxShadow: `0 4px 18px ${C.greenG}` }}>🇰🇪</div>
-            <div><div style={{ color: C.text, fontWeight: 800, fontSize: 16, fontFamily: "'Fraunces',serif", lineHeight: 1 }}>Malipo</div><div style={{ color: C.muted, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase" }}>Compliance Suite</div></div>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ width: 44, height: 44, background: "#fff", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 4px 12px rgba(0,0,0,0.05)`, border: `1px solid ${C.border}`, overflow: "hidden" }}>
+              <img src="/logo.png" alt="Logo" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            </div>
+            <div><div style={{ color: C.text, fontWeight: 800, fontSize: 18, fontFamily: "'Fraunces',serif", lineHeight: 1 }}>Malipo</div><div style={{ color: C.muted, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase" }}>Compliance Suite</div></div>
           </div>
         </div>
         <div style={{ padding: "14px 22px", borderBottom: `1px solid ${C.border}` }}>
