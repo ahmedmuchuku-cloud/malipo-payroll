@@ -705,6 +705,35 @@ function Employees({ employees, setEmployees, account }) {
     setAdding(false); setEditing(null);
   };
 
+  const handleImportExcel = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const bstr = evt.target.result;
+        const wb = window.XLSX.read(bstr, { type: 'binary' });
+        const wsname = wb.SheetNames[0];
+        const ws = wb.Sheets[wsname];
+        const data = window.XLSX.utils.sheet_to_json(ws);
+
+        const newEmps = data.map((row, idx) => ({
+          id: Date.now() + idx,
+          ...row,
+          customDeductions: row.customDeductions ? JSON.parse(row.customDeductions) : []
+        }));
+
+        setEmployees(prev => [...prev, ...newEmps]);
+        showToast(`Migrated ${newEmps.length} employees successfully!`);
+      } catch (err) {
+        showToast("Error parsing Excel: Ensure file matches schema", false);
+        console.error(err);
+      }
+    };
+    reader.readAsBinaryString(file);
+    e.target.value = ""; // reset for same file re-upload
+  };
+
   const remove = id => { const e = employees.find(x => x.id === id); setEmployees(employees.filter(x => x.id !== id)); showToast(`${e?.name || "Employee"} removed`, false); };
 
   const totals = employees.reduce((a, e) => { const g = getGross(e), d = calcAll(g, getAdj(e)); return { g: a.g + g, p: a.p + d.paye, n: a.n + d.nssf, s: a.s + d.shif, h: a.h + d.ahl, net: a.net + d.net }; }, { g: 0, p: 0, n: 0, s: 0, h: 0, net: 0 });
@@ -717,7 +746,17 @@ function Employees({ employees, setEmployees, account }) {
         <div style={{ display: "flex", gap: 10 }}>
           <input placeholder="Search name, role, dept…" value={search} onChange={e => setSearch(e.target.value)}
             style={{ background: C.surf, border: `1px solid ${C.borderB}`, borderRadius: 8, padding: "8px 14px", color: C.text, fontSize: 13, outline: "none", width: 220 }} />
-          {adminMode && <button onClick={() => setAdding(true)} style={{ background: C.green, color: "#000", border: "none", padding: "9px 20px", borderRadius: 8, fontWeight: 700, fontSize: 13, cursor: "pointer" }}>+ Add Employee</button>}
+          {adminMode && (
+            <>
+              <input type="file" id="excel-upload" hidden accept=".xlsx,.xls,.ods" onChange={handleImportExcel} />
+              <button
+                onClick={() => document.getElementById('excel-upload').click()}
+                style={{ background: C.surf, color: C.green, border: `1px solid ${C.green}55`, padding: "9px 20px", borderRadius: 8, fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
+                ⇑ Bulk Import
+              </button>
+              <button onClick={() => setAdding(true)} style={{ background: C.green, color: "#000", border: "none", padding: "9px 20px", borderRadius: 8, fontWeight: 700, fontSize: 13, cursor: "pointer" }}>+ Add Employee</button>
+            </>
+          )}
         </div>
       </div>
 
