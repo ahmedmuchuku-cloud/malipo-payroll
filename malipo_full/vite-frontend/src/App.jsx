@@ -258,70 +258,125 @@ function Toast({ msg, ok }) {
 }
 
 function LandingPage({ onEnterAuth, onEnterCalc }) {
-  const [showFAQ, setShowFAQ] = useState(false);
+  const [hovered, setHovered] = useState(null);
+
+  // Feature Card Component
+  const Feature = ({ title, desc, icon, img, delay = 0 }) => (
+    <div
+      onMouseEnter={() => setHovered(title)}
+      onMouseLeave={() => setHovered(null)}
+      style={{
+        background: C.card,
+        border: `1px solid ${C.border}`,
+        padding: 40,
+        borderRadius: 24,
+        textAlign: "left",
+        transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+        transform: hovered === title ? "translateY(-10px)" : "translateY(0)",
+        boxShadow: hovered === title ? `0 20px 40px rgba(0,0,0,0.3)` : "none",
+        position: "relative",
+        overflow: "hidden"
+      }}>
+      {img ? (
+        <div style={{ width: "120%", height: 180, marginLeft: "-10%", marginBottom: 24, borderRadius: 16, overflow: "hidden", background: C.surf }}>
+          <img src={img} alt={title} style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.9 }} />
+        </div>
+      ) : (
+        <div style={{ fontSize: 40, marginBottom: 24 }}>{icon}</div>
+      )}
+      <h3 style={{ fontSize: 20, fontWeight: 800, marginBottom: 14, color: "#fff" }}>{title}</h3>
+      <p style={{ color: C.muted, fontSize: 15, lineHeight: 1.7 }}>{desc}</p>
+    </div>
+  );
+
   return (
     <div style={{ minHeight: "100vh", background: C.bg, color: C.text, fontFamily: "'Sora',sans-serif", overflowX: "hidden" }}>
+      <style>{`
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-20px); } 100% { transform: translateY(0px); } }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+      `}</style>
+
+      {/* Navbar */}
+      <nav style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "32px 60px", maxWidth: 1400, margin: "0 auto", position: "relative", zIndex: 10 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ width: 40, height: 40, background: "#fff", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 12px rgba(0,0,0,0.2)" }}>
+            <img src="/logo.png" style={{ width: "80%", height: "80%", objectFit: "contain" }} />
+          </div>
+          <span style={{ fontSize: 22, fontWeight: 800, fontFamily: "'Fraunces',serif" }}>Malipo</span>
+        </div>
+        <div style={{ display: "flex", gap: 32, alignItems: "center" }}>
+          <button onClick={onEnterAuth} style={{ background: "transparent", color: C.text, border: "none", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Login</button>
+          <button onClick={onEnterAuth} style={{ background: C.green, color: "#000", border: "none", padding: "10px 24px", borderRadius: 10, fontWeight: 800, fontSize: 14, cursor: "pointer", boxShadow: `0 8px 20px ${C.green}44` }}>Get Started</button>
+        </div>
+      </nav>
+
       {/* Hero Section */}
-      <div style={{ minHeight: "90vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "80px 40px", textAlign: "center", position: "relative" }}>
-        <div style={{ position: "absolute", top: -100, left: -100, width: 400, height: 400, background: C.greenG, borderRadius: "50%", filter: "blur(120px)", zIndex: 0 }} />
-        <div style={{ position: "absolute", bottom: -100, right: -100, width: 400, height: 400, background: `${C.blue}11`, borderRadius: "50%", filter: "blur(120px)", zIndex: 0 }} />
-
-        <div style={{ maxWidth: 900, zIndex: 1 }}>
-          <div style={{ width: 80, height: 80, background: `linear-gradient(135deg,#fff,#f8fafc)`, borderRadius: 22, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 32px", boxShadow: `0 12px 40px rgba(0,0,0,0.1)`, border: `1px solid ${C.border}`, overflow: "hidden" }}>
-            <img src="/logo.png" alt="Malipo Logo" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+      <div style={{ maxWidth: 1400, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 60, padding: "60px 60px 120px", alignItems: "center", minHeight: "80vh" }}>
+        <div style={{ zIndex: 2 }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: C.greenG, padding: "6px 16px", borderRadius: 100, color: C.green, fontSize: 12, fontWeight: 700, letterSpacing: "0.05em", marginBottom: 24, border: `1px solid ${C.green}33` }}>
+            <span style={{ animation: "pulse 2s infinite" }}>●</span> 2025/26 COMPLIANCE READY
           </div>
-          <h1 style={{ fontFamily: "'Fraunces',serif", fontSize: "clamp(2.5rem, 5vw, 4.5rem)", fontWeight: 800, lineHeight: 1.05, marginBottom: 24, letterSpacing: "-0.02em" }}>
-            Modern Payroll & Compliance <br /><span style={{ background: `linear-gradient(135deg,${C.green},${C.blue})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Simplified for Kenya.</span>
+          <h1 style={{ fontFamily: "'Fraunces',serif", fontSize: "clamp(3rem, 5vw, 5rem)", fontWeight: 800, lineHeight: 1.05, marginBottom: 28, letterSpacing: "-0.03em" }}>
+            The Smartest Way to <br />
+            <span style={{ background: `linear-gradient(135deg,${C.green},${C.blue},#fff)`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Pay Your Team.</span>
           </h1>
-          <p style={{ color: C.muted, fontSize: "clamp(16px, 1.2vw, 20px)", lineHeight: 1.6, marginBottom: 48, maxWidth: 700, margin: "0 auto 48px" }}>
-            Automate PAYE, NSSF, SHIF, and Housing Levy. Generate iTax-ready CSVs and beautiful slips. Built for the modern Kenyan business.
+          <p style={{ color: C.muted, fontSize: 19, lineHeight: 1.6, marginBottom: 48, maxWidth: 550 }}>
+            Automate PAYE, NSSF, SHIF, and Housing Levy with Kenya's most advanced payroll platform. Built for security, designed for speed.
           </p>
-
-          <div style={{ display: "flex", gap: 20, justifyContent: "center", flexWrap: "wrap", marginBottom: 64 }}>
-            <button onClick={onEnterAuth} style={{ background: `linear-gradient(135deg,${C.green},${C.greenD})`, color: "#050e09", border: "none", padding: "18px 42px", borderRadius: 14, fontWeight: 800, fontSize: 17, cursor: "pointer", transition: "transform 0.2s, box-shadow 0.2s", boxShadow: `0 8px 24px ${C.green}44` }}>Launch Company Portal →</button>
-            <button onClick={onEnterCalc} style={{ background: C.surf, color: C.green, border: `1px solid ${C.green}44`, padding: "18px 42px", borderRadius: 14, fontWeight: 700, fontSize: 17, cursor: "pointer" }}>Try Statutory Calculator ◈</button>
+          <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
+            <button onClick={onEnterAuth} style={{ background: `linear-gradient(135deg,${C.green},${C.greenD})`, color: "#000", border: "none", padding: "20px 44px", borderRadius: 16, fontWeight: 800, fontSize: 18, cursor: "pointer", boxShadow: `0 12px 32px ${C.green}44`, transition: "transform 0.2s" }} onMouseEnter={e => e.currentTarget.style.transform = "scale(1.05)"} onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}>Try Company Portal →</button>
+            <button onClick={onEnterCalc} style={{ background: C.surf, color: "#fff", border: `1px solid ${C.borderB}`, padding: "20px 44px", borderRadius: 16, fontWeight: 700, fontSize: 18, cursor: "pointer" }}>Free Statutory Calculator</button>
+          </div>
+          <div style={{ marginTop: 40, display: "flex", gap: 24, alignItems: "center", opacity: 0.6 }}>
+            <div style={{ fontSize: 12, fontWeight: 600 }}>TRUSTED BY COMPANIES ACROSS KENYA</div>
+            <div style={{ display: "flex", gap: 12, fontSize: 14, fontWeight: 800 }}>🇰🇪 🏢 🏥 🏫</div>
+          </div>
+        </div>
+        <div style={{ position: "relative" }}>
+          <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: 600, height: 600, background: `radial-gradient(circle, ${C.green}11 0%, transparent 70%)`, filter: "blur(60px)", zIndex: 0 }} />
+          <div style={{ animation: "float 6s ease-in-out infinite", position: "relative", zIndex: 1 }}>
+            <img src="/hero.png" alt="Malipo Dashboard" style={{ width: "115%", borderRadius: 32, boxShadow: "0 40px 100px rgba(0,0,0,0.6)", border: `1px solid ${C.borderB}` }} />
           </div>
         </div>
       </div>
 
-      {/* Features Grid */}
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 40px 100px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 32 }}>
-        {[
-          { t: "Bulletproof Compliance", d: "Automatically updated with 2025/26 KRA tax bands and SHIF 2.75% rates.", i: "⚖️" },
-          { t: "Withholding Tax (WHT)", d: "Full support for contractor payments with 3%, 5%, or 20% WHT auto-calculation.", i: "⚖️" },
-          { t: "iTax & Statutory Exports", d: "One-click generation of KRA PAYE/WHT CSVs, NSSF templates, and SHIF schedules.", i: "📋" },
-          { t: "Role-Based Access", d: "Granular permissions for Admins, Accountants, and Staff with 2FA protection.", i: "🔒" },
-          { t: "Employee Self-Service", d: "Staff can view their data and download PDF payslips without touching admin settings.", i: "👤" },
-          { t: "Bulk Excel Migration", d: "Migrate hundreds of employees from your existing spreadsheets in seconds.", i: "🚀" },
-          { t: "Privacy First", d: "All data stays in your browser (LocalStorage). No tracking, no sharing.", i: "🛡️" }
-        ].map(f => (
-          <div key={f.t} style={{ background: C.card, border: `1px solid ${C.border}`, padding: 32, borderRadius: 20, textAlign: "left" }}>
-            <div style={{ fontSize: 28, marginBottom: 16 }}>{f.i}</div>
-            <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12 }}>{f.t}</h3>
-            <p style={{ color: C.muted, fontSize: 14, lineHeight: 1.6 }}>{f.d}</p>
+      {/* Feature Section */}
+      <div style={{ background: C.surf, padding: "120px 60px" }}>
+        <div style={{ maxWidth: 1400, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 80 }}>
+            <h2 style={{ fontFamily: "'Fraunces',serif", fontSize: 48, fontWeight: 800, marginBottom: 20 }}>Payroll, reimagined.</h2>
+            <p style={{ color: C.muted, fontSize: 18, maxWidth: 600, margin: "0 auto" }}>Everything you need to stay compliant and keep your employees happy, all in one place.</p>
           </div>
-        ))}
-      </div>
-
-      {/* FAQ / Info */}
-      <div style={{ background: C.surf, padding: "80px 40px", textAlign: "center" }}>
-        <h2 style={{ fontFamily: "'Fraunces',serif", fontSize: 32, marginBottom: 40 }}>Common Questions</h2>
-        <div style={{ maxWidth: 700, margin: "0 auto", textAlign: "left" }}>
-          {[
-            { q: "Is this officially synchronized with KRA?", a: "We use the latest Finance Act 2023/24 tax bands. While we aim for 100% accuracy, we recommend verifying final uploads on the iTax portal." },
-            { q: "How much does it cost?", a: "Malipo is currently in public beta and free for Kenyan SMEs to help streamline local compliance." },
-            { q: "Where is my data stored?", a: "We use 'Local-First' storage. Your employee details never leave your device unless you manually sync them to your own secure cloud." }
-          ].map((item, idx) => (
-            <div key={idx} style={{ marginBottom: 24, borderBottom: `1px solid ${C.border}`, paddingBottom: 24 }}>
-              <h4 style={{ color: C.green, marginBottom: 8, fontWeight: 700 }}>{item.q}</h4>
-              <p style={{ color: C.muted, fontSize: 14 }}>{item.a}</p>
-            </div>
-          ))}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 32 }}>
+            <Feature title="Kenya Tax Compliance" img="/compliance.png" desc="Automatically updated with the latest 2025 bands, SHIF 2.75% rates, and Housing Levy laws." />
+            <Feature title="Deep Analytics" img="/analytics.png" desc="Visualize your payroll spending, department costs, and tax obligations with beautiful charts." />
+            <Feature title="iTax-Ready Exports" icon="📊" desc="Generate CSV templates for PAYE and NSSF in the exact format required by Kenyan authorities." />
+            <Feature title="Withholding Tax" icon="⚖️" desc="Support for 3%, 5%, and 20% WHT rates with automatic certificate data generation." />
+            <Feature title="Cloud Sync & Backup" icon="☁️" desc="Protect your data with encrypted cloud backups and access your payroll from any device." />
+            <Feature title="Privacy First" icon="🛡️" desc="Your data is yours. Local-first architecture means sensitive employee info stays on your device." />
+          </div>
         </div>
       </div>
 
-      <footer style={{ padding: 40, textAlign: "center", borderTop: `1px solid ${C.border}`, opacity: 0.5 }}>
-        <div style={{ fontSize: 12 }}>© 2026 Malipo Compliance · Made for Kenya 🇰🇪</div>
+      {/* Pricing / CTA */}
+      <div style={{ padding: "120px 60px", textAlign: "center" }}>
+        <div style={{ maxWidth: 800, margin: "0 auto", background: `linear-gradient(135deg, ${C.card}, ${C.bg})`, padding: 80, borderRadius: 48, border: `1px solid ${C.border}`, position: "relative", overflow: "hidden" }}>
+          <div style={{ position: "absolute", top: -100, right: -100, width: 300, height: 300, background: C.greenG, borderRadius: "50%", filter: "blur(80px)" }} />
+          <h2 style={{ fontFamily: "'Fraunces',serif", fontSize: 42, fontWeight: 800, marginBottom: 24 }}>Ready to scale your business?</h2>
+          <p style={{ color: C.muted, fontSize: 18, marginBottom: 48 }}>Join hundreds of Kenyan companies simplifying their compliance today. Malipo is free for small teams.</p>
+          <button onClick={onEnterAuth} style={{ background: C.green, color: "#000", border: "none", padding: "22px 56px", borderRadius: 16, fontWeight: 800, fontSize: 19, cursor: "pointer", boxShadow: `0 12px 32px ${C.green}44` }}>Get Started for Free</button>
+          <div style={{ marginTop: 32, color: C.muted, fontSize: 13, fontWeight: 600 }}>NO CREDIT CARD REQUIRED · INSTANT SETUP</div>
+        </div>
+      </div>
+
+      <footer style={{ padding: "80px 60px", borderTop: `1px solid ${C.border}`, background: C.bg }}>
+        <div style={{ maxWidth: 1400, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <img src="/logo.png" style={{ width: 32, height: 32 }} />
+            <span style={{ fontWeight: 800, fontSize: 18, fontFamily: "'Fraunces',serif" }}>Malipo</span>
+          </div>
+          <div style={{ color: C.muted, fontSize: 14, fontWeight: 500 }}>© 2026 Malipo Compliance · Made for Kenya with ❤️ 🇰🇪</div>
+        </div>
       </footer>
     </div>
   );
@@ -383,9 +438,18 @@ function AuthScreen({ onAuth, onBack }) {
       if (!res.ok) throw new Error(data.detail || "Registration failed");
 
       setLoading(false);
-      setVerificationPending({ ...form, id: Date.now() });
-      setMode("verify");
-      // Note: Verification code is logged by backend for this demo
+      // BYPASS VERIFICATION FOR NOW
+      const account = {
+        companyName: form.company,
+        kraPin: form.kraPin, nssfNo: form.nssfNo,
+        shaNo: form.shaNo, contactName: form.contactName,
+        role: form.role, email: form.email.toLowerCase(),
+        password: form.password, isVerified: true,
+        permissions: { canWrite: true, canExport: true, isAdmin: true }
+      };
+      await storageSet("malipo:account", account);
+      await storageSet("malipo:settings", { company: form.company, pin: form.kraPin, nssf: form.nssfNo, sha: form.shaNo, paybill: "222222", email: form.email, rem7: true, rem3: true, rem0: true, email_rem: false, year: "2024/25" });
+      onAuth(account, true);
     } catch (e) {
       setLoading(false);
       setErr(e.message);
@@ -1786,21 +1850,36 @@ export default function App() {
       if (acct) setAccount(acct);
 
       const emps = await storageGet("malipo:employees");
-      if (emps && emps.length > 0) setEmployees(emps);
-      const sett = await storageGet("malipo:settings");
-      if (sett) setSettings(sett);
-      const fil = await storageGet("malipo:filings");
-      if (fil) setFilings(fil);
-      const staff = await storageGet("malipo:staffUsers");
-      if (staff) setStaffUsers(staff);
       setLoaded(true);
     })();
   }, []);
 
-  // Persist employees
-  useEffect(() => { if (loaded) storageSet("malipo:employees", employees); }, [employees, loaded]);
-  // Persist filings
-  useEffect(() => { if (loaded) storageSet("malipo:filings", filings); }, [filings, loaded]);
+  // Isolated Data Loading
+  useEffect(() => {
+    if (!account || account.isEmployee) return;
+    (async () => {
+      const pin = account.kraPin || "default";
+      const emps = await storageGet(`malipo:data:${pin}:employees`);
+      if (emps) setEmployees(emps);
+      const sett = await storageGet(`malipo:data:${pin}:settings`);
+      if (sett) setSettings(sett);
+      const fil = await storageGet(`malipo:data:${pin}:filings`);
+      if (fil) setFilings(fil);
+      const staff = await storageGet(`malipo:data:${pin}:staffUsers`);
+      if (staff) setStaffUsers(staff);
+    })();
+  }, [account]);
+
+  // Isolated Data Persistence
+  useEffect(() => {
+    if (loaded && account && !account.isEmployee) {
+      const pin = account.kraPin || "default";
+      storageSet(`malipo:data:${pin}:employees`, employees);
+      storageSet(`malipo:data:${pin}:filings`, filings);
+      storageSet(`malipo:data:${pin}:settings`, settings);
+      storageSet(`malipo:data:${pin}:staffUsers`, staffUsers);
+    }
+  }, [employees, filings, settings, staffUsers, loaded, account]);
 
   const handleAuth = useCallback((acct, isNew) => {
     setAccount(acct);
@@ -1821,15 +1900,32 @@ export default function App() {
     </div>
   );
 
+  const GlobalStyle = () => (
+    <style>{`
+      @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Fraunces:opsz,wght@9..144,300;9..144,700;9..144,800&display=swap');
+      *{box-sizing:border-box}
+      ::-webkit-scrollbar{width:5px}
+      ::-webkit-scrollbar-track{background:${C.bg}}
+      ::-webkit-scrollbar-thumb{background:${C.border};border-radius:99px}
+      input[type=range]{-webkit-appearance:none;height:4px;border-radius:99px;background:${C.border};outline:none;width:100%}
+      input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:${C.green};cursor:pointer;box-shadow:0 0 8px ${C.green}88}
+      select{-webkit-appearance:none}
+    `}</style>
+  );
+
   if (view === "landing") return (
-    <LandingPage
-      onEnterAuth={() => account ? setView("app") : setView("auth")}
-      onEnterCalc={() => setView("public-calc")}
-    />
+    <>
+      <GlobalStyle />
+      <LandingPage
+        onEnterAuth={() => account ? setView("app") : setView("auth")}
+        onEnterCalc={() => setView("public-calc")}
+      />
+    </>
   );
   if (view === "public-calc") {
     return (
       <div style={{ minHeight: "100vh", background: C.bg, display: "flex", flexDirection: "column", alignItems: "center", padding: 40 }}>
+        <GlobalStyle />
         <div style={{ maxWidth: 800, width: "100%" }}>
           <button onClick={() => setView("landing")} style={{ background: "transparent", color: C.muted, border: "none", cursor: "pointer", marginBottom: 20 }}>← Back home</button>
           <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 24, padding: 32 }}>
@@ -1845,8 +1941,8 @@ export default function App() {
     );
   }
 
-  if (view === "auth") return <AuthScreen onAuth={handleAuth} onBack={() => setView("landing")} />;
-  if (account && account.isEmployee) return <EmployeePortal account={account} onLogout={handleLogout} />;
+  if (view === "auth") return <>{<GlobalStyle />} <AuthScreen onAuth={handleAuth} onBack={() => setView("landing")} /></>;
+  if (account && account.isEmployee) return <>{<GlobalStyle />} <EmployeePortal account={account} onLogout={handleLogout} /></>;
 
   const dl = getDaysLeft(), uc = dl.days <= 3 ? C.red : dl.days <= 7 ? C.gold : C.green;
   const pendingCount = Object.values(filings["Mar-25"] || {}).filter(v => v === "pending").length;
@@ -1854,16 +1950,7 @@ export default function App() {
 
   return (
     <div style={{ display: "flex", height: "100vh", background: C.bg, color: C.text, fontFamily: "'Sora','DM Sans',system-ui,sans-serif", overflow: "hidden" }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Fraunces:opsz,wght@9..144,300;9..144,700;9..144,800&display=swap');
-        *{box-sizing:border-box}
-        ::-webkit-scrollbar{width:5px}
-        ::-webkit-scrollbar-track{background:${C.bg}}
-        ::-webkit-scrollbar-thumb{background:${C.border};border-radius:99px}
-        input[type=range]{-webkit-appearance:none;height:4px;border-radius:99px;background:${C.border};outline:none;width:100%}
-        input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:${C.green};cursor:pointer;box-shadow:0 0 8px ${C.green}88}
-        select{-webkit-appearance:none}
-      `}</style>
+      <GlobalStyle />
       {toast && <Toast msg={toast.m} ok={toast.ok} />}
 
       {/* SIDEBAR */}
