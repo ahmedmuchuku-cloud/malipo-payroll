@@ -278,8 +278,8 @@ function LandingPage({ onEnterAuth, onEnterCalc }) {
         overflow: "hidden"
       }}>
       {img ? (
-        <div style={{ width: "120%", height: 180, marginLeft: "-10%", marginBottom: 24, borderRadius: 16, overflow: "hidden", background: C.surf }}>
-          <img src={img} alt={title} style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.9 }} />
+        <div style={{ width: "100%", height: 180, marginBottom: 24, borderRadius: 16, overflow: "hidden", background: C.card, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <img src={img} alt={title} style={{ maxWidth: "90%", maxHeight: "90%", objectFit: "contain", opacity: 0.9 }} />
         </div>
       ) : (
         <div style={{ fontSize: 40, marginBottom: 24 }}>{icon}</div>
@@ -350,10 +350,10 @@ function LandingPage({ onEnterAuth, onEnterCalc }) {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 32 }}>
             <Feature title="Kenya Tax Compliance" img="/compliance.png" desc="Automatically updated with the latest 2025 bands, SHIF 2.75% rates, and Housing Levy laws." />
             <Feature title="Deep Analytics" img="/analytics.png" desc="Visualize your payroll spending, department costs, and tax obligations with beautiful charts." />
-            <Feature title="iTax-Ready Exports" icon="📊" desc="Generate CSV templates for PAYE and NSSF in the exact format required by Kenyan authorities." />
-            <Feature title="Withholding Tax" icon="⚖️" desc="Support for 3%, 5%, and 20% WHT rates with automatic certificate data generation." />
-            <Feature title="Cloud Sync & Backup" icon="☁️" desc="Protect your data with encrypted cloud backups and access your payroll from any device." />
-            <Feature title="Privacy First" icon="🛡️" desc="Your data is yours. Local-first architecture means sensitive employee info stays on your device." />
+            <Feature title="iTax-Ready Exports" img="/exports.png" desc="Generate CSV templates for PAYE and NSSF in the exact format required by Kenyan authorities." />
+            <Feature title="Withholding Tax" img="/wht_tax.png" desc="Support for 3%, 5%, and 20% WHT rates with automatic certificate data generation." />
+            <Feature title="Cloud Sync & Backup" img="/cloud.png" desc="Protect your data with encrypted cloud backups and access your payroll from any device." />
+            <Feature title="Privacy First" img="/privacy.png" desc="Your data is yours. Local-first architecture means sensitive employee info stays on your device." />
           </div>
         </div>
       </div>
@@ -428,32 +428,37 @@ function AuthScreen({ onAuth, onBack }) {
 
     setLoading(true);
     setErr("");
-    try {
-      const res = await fetch(`${API_BASE}/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: form.email, company: form.company })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Registration failed");
 
-      setLoading(false);
-      // BYPASS VERIFICATION FOR NOW
-      const account = {
-        companyName: form.company,
-        kraPin: form.kraPin, nssfNo: form.nssfNo,
-        shaNo: form.shaNo, contactName: form.contactName,
-        role: form.role, email: form.email.toLowerCase(),
-        password: form.password, isVerified: true,
-        permissions: { canWrite: true, canExport: true, isAdmin: true }
-      };
-      await storageSet("malipo:account", account);
-      await storageSet("malipo:settings", { company: form.company, pin: form.kraPin, nssf: form.nssfNo, sha: form.shaNo, paybill: "222222", email: form.email, rem7: true, rem3: true, rem0: true, email_rem: false, year: "2024/25" });
-      onAuth(account, true);
-    } catch (e) {
-      setLoading(false);
-      setErr(e.message);
-    }
+    // Simulate slight delay for "premium" feel
+    setTimeout(async () => {
+      try {
+        const account = {
+          companyName: form.company,
+          kraPin: form.kraPin, nssfNo: form.nssfNo,
+          shaNo: form.shaNo, contactName: form.contactName,
+          role: form.role, email: form.email.toLowerCase(),
+          password: form.password, isVerified: true,
+          permissions: { canWrite: true, canExport: true, isAdmin: true }
+        };
+        await storageSet("malipo:account", account);
+        await storageSet("malipo:settings", {
+          company: form.company,
+          pin: form.kraPin,
+          nssf: form.nssfNo,
+          sha: form.shaNo,
+          paybill: "222222",
+          email: form.email,
+          rem7: true, rem3: true, rem0: true,
+          email_rem: false, year: "2024/25"
+        });
+
+        setLoading(false);
+        onAuth(account, true);
+      } catch (e) {
+        setLoading(false);
+        setErr("Storage error: " + e.message);
+      }
+    }, 800);
   };
 
   const handleVerify = async () => {
@@ -1149,42 +1154,45 @@ function Employees({ employees, setEmployees, account }) {
             {/* Earnings breakdown */}
             {(payslip.basicSalary || payslip.housingAllowance || payslip.transportAllowance) > 0 && (
               <div style={{ marginBottom: 12 }}>
-                <div style={{ color: C.muted, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 6 }}>Earnings</div>
+                <div style={{ color: C.muted, fontSize: 13, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 6 }}>Earnings</div>
                 {[["Basic Salary", payslip.basicSalary || 0], ["Housing Allowance", payslip.housingAllowance || 0], ["Transport Allowance", payslip.transportAllowance || 0], ["Other Allowances", payslip.otherAllowances || 0]].filter(([, v]) => v > 0).map(([l, v]) => (
                   <div key={l} style={{ display: "flex", justifyContent: "space-between", padding: "7px 0", borderBottom: `1px solid ${C.border}22` }}>
-                    <span style={{ color: C.muted, fontSize: 12, paddingLeft: 12 }}>{l}</span><span style={{ color: C.green, fontSize: 12, fontWeight: 600 }}>{fmt(v)}</span>
+                    <span style={{ color: C.muted, fontSize: 14, paddingLeft: 12 }}>{l}</span><span style={{ color: C.green, fontSize: 14, fontWeight: 600 }}>{fmt(v)}</span>
                   </div>
                 ))}
               </div>
             )}
             {[["Gross Salary", g, C.text], ["Less: NSSF (Phase 4)", -d.nssf, C.blue], ["Less: SHIF (2.75%)", -d.shif, C.gold], ["Less: AHL (1.5%)", -d.ahl, C.purple]].map(([l, v, c]) => (
               <div key={l} style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", borderBottom: `1px solid ${C.border}` }}>
-                <span style={{ color: C.muted, fontSize: 13 }}>{l}</span><span style={{ color: c, fontSize: 13, fontWeight: 600 }}>{v < 0 ? `(${fmt(Math.abs(v))})` : fmt(v)}</span>
+                <span style={{ color: C.muted, fontSize: 15 }}>{l}</span><span style={{ color: c, fontSize: 15, fontWeight: 600 }}>{v < 0 ? `(${fmt(Math.abs(v))})` : fmt(v)}</span>
               </div>
             ))}
-            {d.pensionDed > 0 && <div style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", borderBottom: `1px solid ${C.border}` }}><span style={{ color: C.muted, fontSize: 13 }}>Less: Pension (pre-tax)</span><span style={{ color: C.blue, fontSize: 13, fontWeight: 600 }}>({fmt(d.pensionDed)})</span></div>}
+            {d.pensionDed > 0 && <div style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", borderBottom: `1px solid ${C.border}` }}><span style={{ color: C.muted, fontSize: 15 }}>Less: Pension (pre-tax)</span><span style={{ color: C.blue, fontSize: 15, fontWeight: 600 }}>({fmt(d.pensionDed)})</span></div>}
             <div style={{ display: "flex", justifyContent: "space-between", padding: "9px 6px", margin: "2px -6px", background: C.borderB + "55", borderRadius: 6 }}>
-              <span style={{ color: C.text, fontSize: 12, fontStyle: "italic", fontWeight: 600 }}>= Taxable Income</span><span style={{ color: C.text, fontSize: 13, fontWeight: 700 }}>{fmt(d.taxableIncome)}</span>
+              <span style={{ color: C.text, fontSize: 14, fontStyle: "italic", fontWeight: 600 }}>= Taxable Income</span><span style={{ color: C.text, fontSize: 15, fontWeight: 700 }}>{fmt(d.taxableIncome)}</span>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", borderBottom: `1px solid ${C.border}` }}><span style={{ color: C.muted, fontSize: 13 }}>Less: PAYE (net of reliefs)</span><span style={{ color: C.red, fontSize: 13, fontWeight: 600 }}>({fmt(d.paye)})</span></div>
-            {d.helb > 0 && <div style={{ display: "flex", justifyContent: "space-between", padding: "7px 0", borderBottom: `1px solid ${C.border}` }}><span style={{ color: C.muted, fontSize: 12, paddingLeft: 8 }}>Less: HELB</span><span style={{ color: C.red, fontSize: 12 }}>({fmt(d.helb)})</span></div>}
-            {(d.customDeductions || []).map((cd, idx) => (Number(cd.amount) > 0) && <div key={idx} style={{ display: "flex", justifyContent: "space-between", padding: "7px 0", borderBottom: `1px solid ${C.border}` }}><span style={{ color: C.muted, fontSize: 12, paddingLeft: 8 }}>Less: {cd.name || "Custom Deduction"}</span><span style={{ color: C.red, fontSize: 12 }}>({fmt(Number(cd.amount))})</span></div>)}
-            {(d.other - (d.customDeductions || []).reduce((acc, cd) => acc + (Number(cd.amount) || 0), 0)) > 0 && <div style={{ display: "flex", justifyContent: "space-between", padding: "7px 0", borderBottom: `1px solid ${C.border}` }}><span style={{ color: C.muted, fontSize: 12, paddingLeft: 8 }}>Less: Other Standard Deductions</span><span style={{ color: C.red, fontSize: 12 }}>({fmt(d.other - (d.customDeductions || []).reduce((acc, cd) => acc + (Number(cd.amount) || 0), 0))})</span></div>}
+            <div style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", borderBottom: `1px solid ${C.border}` }}><span style={{ color: C.muted, fontSize: 15 }}>Less: PAYE (net of reliefs)</span><span style={{ color: C.red, fontSize: 15, fontWeight: 600 }}>({fmt(d.paye)})</span></div>
+            {d.helb > 0 && <div style={{ display: "flex", justifyContent: "space-between", padding: "7px 0", borderBottom: `1px solid ${C.border}` }}><span style={{ color: C.muted, fontSize: 14, paddingLeft: 8 }}>Less: HELB</span><span style={{ color: C.red, fontSize: 14 }}>({fmt(d.helb)})</span></div>}
+            {(d.customDeductions || []).map((cd, idx) => (Number(cd.amount) > 0) && <div key={idx} style={{ display: "flex", justifyContent: "space-between", padding: "7px 0", borderBottom: `1px solid ${C.border}` }}><span style={{ color: C.muted, fontSize: 14, paddingLeft: 8 }}>Less: {cd.name || "Custom Deduction"}</span><span style={{ color: C.red, fontSize: 14 }}>({fmt(Number(cd.amount))})</span></div>)}
+            {(d.other - (d.customDeductions || []).reduce((acc, cd) => acc + (Number(cd.amount) || 0), 0)) > 0 && <div style={{ display: "flex", justifyContent: "space-between", padding: "7px 0", borderBottom: `1px solid ${C.border}` }}><span style={{ color: C.muted, fontSize: 14, paddingLeft: 8 }}>Less: Other Standard Deductions</span><span style={{ color: C.red, fontSize: 14 }}>({fmt(d.other - (d.customDeductions || []).reduce((acc, cd) => acc + (Number(cd.amount) || 0), 0))})</span></div>}
             <div style={{ display: "flex", justifyContent: "space-between", padding: "18px 0 4px" }}>
               <span style={{ color: C.text, fontWeight: 700, fontSize: 15 }}>Net Pay</span>
               <span style={{ color: C.green, fontSize: 26, fontWeight: 800, fontFamily: "'Fraunces',serif" }}>{fmt(d.net)}</span>
             </div>
             <div style={{ marginTop: 14, padding: 14, background: C.greenG, border: `1px solid ${C.greenD}44`, borderRadius: 10 }}>
-              <div style={{ color: C.muted, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>Employer Obligations</div>
-              <div style={{ display: "flex", gap: 24 }}>
-                <div><div style={{ color: C.muted, fontSize: 11 }}>NSSF Employer</div><div style={{ color: C.text, fontWeight: 600 }}>{fmt(d.nssf)}</div></div>
-                <div><div style={{ color: C.muted, fontSize: 11 }}>AHL Employer</div><div style={{ color: C.text, fontWeight: 600 }}>{fmt(d.ahl)}</div></div>
-                <div><div style={{ color: C.muted, fontSize: 11 }}>Total Cost to Company</div><div style={{ color: C.green, fontWeight: 700 }}>{fmt(g + d.nssf + d.ahl)}</div></div>
+              <div style={{ color: C.muted, fontSize: 13, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>Employer Obligations</div>
+              <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+                <div><div style={{ color: C.muted, fontSize: 13 }}>NSSF Employer</div><div style={{ color: C.text, fontSize: 15, fontWeight: 600 }}>{fmt(d.nssf)}</div></div>
+                <div><div style={{ color: C.muted, fontSize: 13 }}>AHL Employer</div><div style={{ color: C.text, fontSize: 15, fontWeight: 600 }}>{fmt(d.ahl)}</div></div>
+                <div><div style={{ color: C.muted, fontSize: 13 }}>NITA Training</div><div style={{ color: C.text, fontSize: 15, fontWeight: 600 }}>{fmt(d.nita)}</div></div>
+                <div style={{ width: "100%", borderTop: `1px solid ${C.border}44`, paddingTop: 8, marginTop: 4 }}>
+                  <div style={{ color: C.muted, fontSize: 13 }}>Total Cost to Company</div><div style={{ color: C.green, fontSize: 18, fontWeight: 700 }}>{fmt(g + d.nssf + d.ahl + d.nita)}</div>
+                </div>
               </div>
             </div>
             <div style={{ marginTop: 12, display: "flex", gap: 10 }}>
-              <button onClick={() => setEditing(payslip)} style={{ flex: 1, background: C.surf, color: C.text, border: `1px solid ${C.border}`, padding: "10px", borderRadius: 9, fontWeight: 600, fontSize: 13, cursor: "pointer" }}>Edit Employee</button>
-              <button onClick={() => setPayslip(null)} style={{ flex: 1, background: C.greenD, color: "#000", border: "none", padding: "10px", borderRadius: 9, fontWeight: 700, fontSize: 13, cursor: "pointer" }}>Done</button>
+              <button onClick={() => setEditing(payslip)} style={{ flex: 1, background: C.surf, color: C.text, border: `1px solid ${C.border}`, padding: "10px", borderRadius: 9, fontWeight: 600, fontSize: 15, cursor: "pointer" }}>Edit Employee</button>
+              <button onClick={() => setPayslip(null)} style={{ flex: 1, background: C.greenD, color: "#000", border: "none", padding: "10px", borderRadius: 9, fontWeight: 700, fontSize: 15, cursor: "pointer" }}>Done</button>
             </div>
           </Modal>
         );
@@ -1198,8 +1206,8 @@ function AdjInput({ label, sublabel, value, onChange, max, color }) {
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-        <div><div style={{ color: C.text, fontSize: 12, fontWeight: 600 }}>{label}</div>{sublabel && <div style={{ color: C.muted, fontSize: 10 }}>{sublabel}</div>}</div>
-        <span style={{ color: color || C.green, fontSize: 12, fontWeight: 700 }}>{value > 0 ? fmt(value) : "—"}</span>
+        <div><div style={{ color: C.text, fontSize: 14, fontWeight: 600 }}>{label}</div>{sublabel && <div style={{ color: C.muted, fontSize: 12 }}>{sublabel}</div>}</div>
+        <span style={{ color: color || C.green, fontSize: 14, fontWeight: 700 }}>{value > 0 ? fmt(value) : "—"}</span>
       </div>
       <input type="range" min={0} max={max || 50000} step={100} value={value} onChange={e => onChange(Number(e.target.value))} style={{ width: "100%", accentColor: color || C.green }} />
     </div>
@@ -1220,14 +1228,14 @@ function Calculator({ baseGross, fixedAdj }) {
   const d = calcAll(gross, effectiveAdj, empMock);
   const Row = ({ label, val, color, bold, indent }) => (
     <div style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", borderBottom: `1px solid ${C.border}33` }}>
-      <span style={{ color: C.muted, fontSize: indent ? 11 : 13, paddingLeft: indent ? 14 : 0 }}>{label}</span>
-      <span style={{ color: color || C.text, fontSize: indent ? 11 : 13, fontWeight: bold ? 700 : 600, fontVariantNumeric: "tabular-nums" }}>{val}</span>
+      <span style={{ color: C.muted, fontSize: indent ? 13 : 15, paddingLeft: indent ? 14 : 0 }}>{label}</span>
+      <span style={{ color: color || C.text, fontSize: indent ? 13 : 15, fontWeight: bold ? 700 : 600, fontVariantNumeric: "tabular-nums" }}>{val}</span>
     </div>
   );
   const Divider = ({ label, val }) => (
     <div style={{ display: "flex", justifyContent: "space-between", padding: "9px 6px", margin: "2px -6px", background: C.borderB + "55", borderRadius: 6 }}>
-      <span style={{ color: C.text, fontSize: 12, fontStyle: "italic", fontWeight: 600 }}>{label}</span>
-      <span style={{ color: C.text, fontSize: 13, fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>{val}</span>
+      <span style={{ color: C.text, fontSize: 14, fontStyle: "italic", fontWeight: 600 }}>{label}</span>
+      <span style={{ color: C.text, fontSize: 15, fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>{val}</span>
     </div>
   );
   return (
@@ -1335,24 +1343,30 @@ function Calculator({ baseGross, fixedAdj }) {
             </div>
           )}
           <div style={{ display: "flex", justifyContent: "space-between", padding: "16px 0 0", marginTop: 6, borderTop: `2px solid ${C.borderB}` }}>
-            <span style={{ color: C.text, fontWeight: 800, fontSize: 16, fontFamily: "'Fraunces',serif" }}>{d.isContractor ? "Net Payment" : "Take-Home Pay"}</span>
-            <span style={{ color: C.green, fontSize: 28, fontWeight: 800, fontFamily: "'Fraunces',serif" }}>{fmt(d.net * months)}</span>
+            <span style={{ color: C.text, fontWeight: 800, fontSize: 18, fontFamily: "'Fraunces',serif" }}>{d.isContractor ? "Net Payment" : "Take-Home Pay"}</span>
+            <span style={{ color: C.green, fontSize: 32, fontWeight: 800, fontFamily: "'Fraunces',serif" }}>{fmt(d.net * months)}</span>
           </div>
+          <div style={{ color: C.muted, fontSize: 14, textAlign: "right", marginTop: 4 }}>{months > 1 ? `Average ${fmt(d.net)}/month` : "Net after all statutory deductions"}</div>
         </div>
         {!d.isContractor && (
           <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: 22 }}>
-            <SecTitle style={{ fontSize: 14 }}>Effective Rates</SecTitle>
-            {[["Gross PAYE Rate", gross > 0 ? ((d.grossPAYE / gross) * 100).toFixed(2) : "0.00", C.red], ["Net PAYE Rate", gross > 0 ? ((d.paye / gross) * 100).toFixed(2) : "0.00", C.gold], ["Total Statutory Rate", gross > 0 ? ((d.totalStatutory / gross) * 100).toFixed(2) : "0.00", C.purple], ["Net Pay Retention", gross > 0 ? ((d.net / gross) * 100).toFixed(2) : "100.00", C.green]].map(([l, v, c]) => (
-              <div key={l} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: `1px solid ${C.border}33` }}>
-                <span style={{ color: C.muted, fontSize: 12 }}>{l}</span>
+            <div style={{ color: C.muted, fontSize: 13, textTransform: "uppercase", fontWeight: 700, marginBottom: 16 }}>Effective Rates</div>
+            {[
+              ["Gross PAYE Rate", ((d.grossPAYE / gross) * 100).toFixed(2), C.red],
+              ["Net PAYE Rate", ((d.paye / gross) * 100).toFixed(2), C.gold],
+              ["Total Statutory Rate", ((d.totalStatutory / gross) * 100).toFixed(2), C.purple],
+              ["Net Pay Retention", ((d.net / gross) * 100).toFixed(2), C.green]
+            ].map(([l, v, c]) => (
+              <div key={l} style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", borderBottom: `1px solid ${C.border}33` }}>
+                <span style={{ color: C.muted, fontSize: 13 }}>{l}</span>
                 <span style={{ color: c, fontWeight: 700, fontSize: 15 }}>{v}%</span>
               </div>
             ))}
           </div>
         )}
-        <div style={{ background: d.isContractor ? `${C.blue}22` : C.redG, border: `1px solid ${d.isContractor ? C.blue : C.red}44`, borderRadius: 12, padding: 16 }}>
-          <div style={{ color: d.isContractor ? C.blue : C.red, fontWeight: 700, fontSize: 13, marginBottom: 6 }}>{d.isContractor ? "ℹ WHT Compliance" : "⚠ 2026 Enforcement Notice"}</div>
-          <div style={{ color: C.muted, fontSize: 11, lineHeight: 1.7 }}>
+        <div style={{ background: d.isContractor ? `${C.blue}22` : C.redG, border: `1px solid ${d.isContractor ? C.blue : C.red}44`, borderRadius: 16, padding: 20 }}>
+          <div style={{ color: d.isContractor ? C.blue : C.red, fontWeight: 800, fontSize: 14, marginBottom: 10 }}>{d.isContractor ? "ℹ WHT COMPLIANCE" : "⚠ 2026 ENFORCEMENT NOTICE"}</div>
+          <div style={{ color: C.muted, fontSize: 13, lineHeight: 1.7 }}>
             {d.isContractor ? (
               <>WHT must be remitted by the 20th of the following month.<br />Certificates are issued via iTax upon successful payment.<br />Rates: Professional (5%), Contractual (3%).</>
             ) : (
